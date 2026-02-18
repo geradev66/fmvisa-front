@@ -1,4 +1,5 @@
 import { createApp } from 'vue';
+import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 import App from './App.vue';
@@ -8,7 +9,7 @@ import 'primeicons/primeicons.css'
 
 // Import services and injection keys
 import { OrdenServicioService } from './services/OrdenServicioService';
-import { OrdenServicioServiceKey } from './injection-keys';
+import { AuthServiceKey, ClienteServiceKey, EquipoServiceKey, OrdenServicioServiceKey } from './injection-keys';
 
 // Import individual components
 import Button from 'primevue/button';
@@ -32,6 +33,9 @@ import Textarea from 'primevue/textarea';
 import Calendar from 'primevue/calendar';
 import InputNumber from 'primevue/inputnumber';
 import router from './router';
+import { AuthService } from './services/AuthService';
+import { ClienteService } from './services/ClienteService';
+import { EquipoService } from './services/EquipoService';
 // Add more components as needed
 
 const app = createApp(App);
@@ -44,11 +48,16 @@ app.use(ToastService);
 app.use(router);
 
 // Provide services globally
-const ordenServicioService = new OrdenServicioService(
-    import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-);
+const ordenServicioService = new OrdenServicioService();
+const authService = new AuthService();
+const clienteService = new ClienteService();
+const equipoService = new EquipoService();
 app.provide(OrdenServicioServiceKey, ordenServicioService);
+app.provide(AuthServiceKey, authService);
+app.provide(ClienteServiceKey, clienteService);
+app.provide(EquipoServiceKey, equipoService);
 
+// Provide more services as needed
 // Register components
 app.component('Button', Button);
 app.component('InputText', InputText);
@@ -70,5 +79,9 @@ app.component('Textarea', Textarea);
 app.component('Calendar', Calendar);
 app.component('InputNumber', InputNumber);
 // Register more components as needed
+
+//Pinia
+const pinia = createPinia()
+app.use(pinia)
 
 app.mount('#app');

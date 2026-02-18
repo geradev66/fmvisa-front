@@ -440,12 +440,14 @@ import type {
 import { useOrdenServicio } from '../composables/useOrdenServicio'
 import { useOrdenServicioService } from '../composables/useOrdenServicioService'
 import { useRouter, useRoute } from 'vue-router'
+import { useToast } from '../composables/useToast'
 
 // Composables
 const { calcularSubtotal, calcularTotal } = useOrdenServicio()
 const ordenService = useOrdenServicioService()
 const router = useRouter()
 const route = useRoute()
+const toast = useToast()
 
 // Estados
 const loading = ref<boolean>(false)
@@ -561,6 +563,7 @@ const crearNuevaOrden = () => {
         autorizacion: null,
         llegadaRefaccion: null
     }
+    toast.showInfo('Formulario listo para una nueva orden', 'Nueva Orden')
     estado.value = {
         pendiente: '',
         enviadoANombre: '',
@@ -607,7 +610,7 @@ const guardarOrden = async () => {
                 ...ordenData,
                 id: ordenId.value
             })
-            console.log('Orden actualizada exitosamente')
+            toast.showSuccess(`Orden #${ordenNumero.value} actualizada correctamente`, 'Orden Actualizada')
         } else {
             // Crear nueva orden
             const nuevaOrden = await ordenService.crearOrden({
@@ -617,7 +620,7 @@ const guardarOrden = async () => {
             })
             ordenId.value = nuevaOrden.id || null
             ordenNumero.value = nuevaOrden.numeroOrden
-            console.log('Orden creada exitosamente:', nuevaOrden)
+            toast.showSuccess(`Orden #${nuevaOrden.numeroOrden} creada exitosamente`, 'Orden Creada')
         }
 
         // Agregar entrada al historial
@@ -626,9 +629,10 @@ const guardarOrden = async () => {
             accion: ordenId.value ? 'Actualización de orden' : 'Creación de orden',
             usuario: 'Usuario Actual'
         })
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al guardar orden:', error)
-        alert('Error al guardar la orden. Por favor intenta de nuevo.')
+        const errorMessage = error.response?.data?.message || 'Error al guardar la orden. Por favor intenta de nuevo.'
+        toast.showError(errorMessage, 'Error al Guardar')
     } finally {
         loading.value = false
     }
@@ -661,7 +665,7 @@ const cargarOrden = async (id: string) => {
 
 const imprimirTicket = async () => {
     if (!ordenId.value) {
-        alert('Debe guardar la orden primero')
+        toast.showWarning('Debe guardar la orden primero', 'Orden no Guardada')
         return
     }
     try {
@@ -669,9 +673,10 @@ const imprimirTicket = async () => {
         const blob = await ordenService.imprimirTicket(ordenId.value)
         const url = window.URL.createObjectURL(blob)
         window.open(url, '_blank')
+        toast.showSuccess('Ticket generado correctamente', 'Impresión Exitosa')
     } catch (error) {
         console.error('Error al imprimir ticket:', error)
-        alert('Error al imprimir el ticket.')
+        toast.showError('Error al imprimir el ticket', 'Error de Impresión')
     } finally {
         loading.value = false
     }
@@ -679,7 +684,7 @@ const imprimirTicket = async () => {
 
 const imprimirOrdenCompleta = async () => {
     if (!ordenId.value) {
-        alert('Debe guardar la orden primero')
+        toast.showWarning('Debe guardar la orden primero', 'Orden no Guardada')
         return
     }
     try {
@@ -687,9 +692,10 @@ const imprimirOrdenCompleta = async () => {
         const blob = await ordenService.imprimirOrden(ordenId.value)
         const url = window.URL.createObjectURL(blob)
         window.open(url, '_blank')
+        toast.showSuccess('Orden completa generada correctamente', 'Impresión Exitosa')
     } catch (error) {
         console.error('Error al imprimir orden:', error)
-        alert('Error al imprimir la orden.')
+        toast.showError('Error al imprimir la orden', 'Error de Impresión')
     } finally {
         loading.value = false
     }

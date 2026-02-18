@@ -66,8 +66,14 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
+import { useAuthStore } from '../stores/AuthStore'
+import { useAuthService } from '../composables/useAuthService'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter()
+const authService = useAuthService()
+const authStore = useAuthStore()
+const toast = useToast()
 
 const credentials = ref({
     username: '',
@@ -108,21 +114,25 @@ const validateForm = () => {
 
 const handleLogin = async () => {
     if (!validateForm()) {
+        toast.showWarning('Por favor completa todos los campos correctamente')
         return
     }
     
     loading.value = true
     
-    // Simular llamada a API
-    setTimeout(() => {
+    try {
+        const response = await authService.login(credentials.value.username, credentials.value.password)
+        authStore.setUser(response.user)
+        authStore.setToken(response.token)
+        toast.showSuccess(`¡Bienvenido ${response.user.firstName}!`, 'Inicio de sesión exitoso')
+        router.push('/orden-servicio')
+    } catch (error: any) {
+        console.error('Login error:', error)
+        const errorMessage = error.response?.data?.message || 'Usuario o contraseña incorrectos'
+        toast.showError(errorMessage, 'Error al iniciar sesión')
+    } finally {
         loading.value = false
-        // Aquí iría la lógica de autenticación real
-        console.log('Login:', credentials.value)
-        console.log('Remember me:', rememberMe.value)
-        
-        // Redirigir al home después del login exitoso
-        router.push('/')
-    }, 1500)
+    }
 }
 </script>
 

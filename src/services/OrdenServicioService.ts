@@ -8,9 +8,11 @@ import type {
 export class OrdenServicioService {
     private api: AxiosInstance
 
-    constructor(baseURL: string = 'http://localhost:3000/api') {
+    constructor() {
+        const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+        const endpoint = '/ordenes'
         this.api = axios.create({
-            baseURL,
+            baseURL: `${baseURL}${endpoint}`,
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -27,12 +29,12 @@ export class OrdenServicioService {
     }
 
     async crearOrden(dto: CrearOrdenServicioDTO): Promise<OrdenServicio> {
-        const response = await this.api.post<OrdenServicio>('/ordenes', dto)
+        const response = await this.api.post<OrdenServicio>('/', dto)
         return response.data
     }
 
     async obtenerOrden(id: string): Promise<OrdenServicio> {
-        const response = await this.api.get<OrdenServicio>(`/ordenes/${id}`)
+        const response = await this.api.get<OrdenServicio>(`/${id}`)
         return response.data
     }
 
@@ -43,42 +45,42 @@ export class OrdenServicioService {
         fechaDesde?: string
         fechaHasta?: string
     }): Promise<{ ordenes: OrdenServicio[]; total: number }> {
-        const response = await this.api.get<{ ordenes: OrdenServicio[]; total: number }>('/ordenes', { params })
+        const response = await this.api.get<{ ordenes: OrdenServicio[]; total: number }>('/', { params })
         return response.data
     }
 
     async actualizarOrden(id: string, dto: ActualizarOrdenServicioDTO): Promise<OrdenServicio> {
-        const response = await this.api.put<OrdenServicio>(`/ordenes/${id}`, dto)
+        const response = await this.api.put<OrdenServicio>(`/${id}`, dto)
         return response.data
     }
 
     async eliminarOrden(id: string): Promise<void> {
-        await this.api.delete(`/ordenes/${id}`)
+        await this.api.delete(`/${id}`)
     }
 
     async buscarOrdenes(query: string): Promise<OrdenServicio[]> {
-        const response = await this.api.get<OrdenServicio[]>('/ordenes/buscar', {
+        const response = await this.api.get<OrdenServicio[]>('/buscar', {
             params: { q: query }
         })
         return response.data
     }
 
     async obtenerReporteDiario(fecha: string): Promise<any> {
-        const response = await this.api.get(`/ordenes/reporte-diario`, {
+        const response = await this.api.get(`/reporte-diario`, {
             params: { fecha }
         })
         return response.data
     }
 
     async imprimirTicket(id: string): Promise<Blob> {
-        const response = await this.api.get(`/ordenes/${id}/ticket`, {
+        const response = await this.api.get(`/${id}/ticket`, {
             responseType: 'blob'
         })
         return response.data
     }
 
     async imprimirOrden(id: string): Promise<Blob> {
-        const response = await this.api.get(`/ordenes/${id}/imprimir`, {
+        const response = await this.api.get(`/${id}/imprimir`, {
             responseType: 'blob'
         })
         return response.data

@@ -11,7 +11,7 @@ export const routes = [
     {
         path: '/',
         name: 'home',
-        component: HomePage
+        redirect: '/login'
     },
     {
         path: '/orden-servicio',
