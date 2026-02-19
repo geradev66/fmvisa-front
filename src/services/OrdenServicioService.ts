@@ -20,7 +20,7 @@ export class OrdenServicioService {
 
         // Interceptor para agregar token de autenticación
         this.api.interceptors.request.use((config) => {
-            const token = localStorage.getItem('authToken')
+            const token = localStorage.getItem('auth_token')
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`
             }
@@ -44,8 +44,24 @@ export class OrdenServicioService {
         estado?: string
         fechaDesde?: string
         fechaHasta?: string
-    }): Promise<{ ordenes: OrdenServicio[]; total: number }> {
-        const response = await this.api.get<{ ordenes: OrdenServicio[]; total: number }>('/', { params })
+    }): Promise<{
+                data: OrdenServicio[],
+                pagination: {
+                    currentPage: number,
+                    totalPages: number,
+                    totalItems: number,
+                    itemsPerPage: number
+                }
+            }> {
+        const response = await this.api.get<{
+                    data: OrdenServicio[],
+                    pagination: {
+                        currentPage: number,
+                        totalPages: number,
+                        totalItems: number,
+                        itemsPerPage: number
+                    }
+                }>('/', { params })
         return response.data
     }
 

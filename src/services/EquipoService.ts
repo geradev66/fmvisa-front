@@ -20,7 +20,7 @@ export class EquipoService {
 
         // Interceptor para agregar token de autenticación
         this.api.interceptors.request.use((config) => {
-            const token = localStorage.getItem('authToken')
+            const token = localStorage.getItem('auth_token')
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`
             }
@@ -49,8 +49,24 @@ export class EquipoService {
         estado?: string
         fechaDesde?: string
         fechaHasta?: string
-    }): Promise<{ equipos: Equipo[]; total: number }> {
-        const response = await this.api.get<{ equipos: Equipo[]; total: number }>('/', { params })
+    }): Promise<{
+                data: Equipo[],
+                pagination: {
+                    currentPage: number,
+                    totalPages: number,
+                    totalItems: number,
+                    itemsPerPage: number
+                }
+            }> {
+        const response = await this.api.get<{
+                    data: Equipo[],
+                    pagination: {
+                        currentPage: number,
+                        totalPages: number,
+                        totalItems: number,
+                        itemsPerPage: number
+                    }
+                }>('/', { params });
         return response.data
     }
 

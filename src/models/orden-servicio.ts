@@ -1,6 +1,7 @@
 // interfaces/orden-servicio.ts
 
 export interface Cliente {
+    _id?: string;
     id?: string;
     nombre: string;
     celular: string;

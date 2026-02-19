@@ -8,7 +8,7 @@
                 </div>
                 <div class="order-details">
                     <span class="order-label">Orden de Servicio</span>
-                    <h1 class="order-number">{{ ordenNumero }}</h1>
+                    <h1 class="order-number">{{ ordenNumero === '' ? 'Nueva Orden' : ordenNumero }}</h1>
                 </div>
             </div>
             <div class="order-date">
@@ -33,73 +33,7 @@
             <!-- Left Column -->
             <div class="left-column">
                 <!-- Datos del Cliente -->
-                <Card class="section-card">
-                    <template #title>
-                        <div class="card-title">
-                            <i class="pi pi-user"></i>
-                            <span>Datos del Cliente</span>
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="form-grid">
-                            <div class="form-row">
-                                <div class="form-field flex-2">
-                                    <label>Nombre</label>
-                                    <InputText v-model="cliente.nombre" placeholder="Nombre completo" />
-                                </div>
-                                <div class="form-field">
-                                    <label>Celular</label>
-                                    <InputText v-model="cliente.celular" placeholder="Número de celular" />
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field flex-2">
-                                    <label>Domicilio</label>
-                                    <InputText v-model="cliente.domicilio" placeholder="Dirección" />
-                                </div>
-                                <div class="form-field">
-                                    <label>RFC</label>
-                                    <InputText v-model="cliente.rfc" placeholder="RFC" />
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Colonia</label>
-                                    <InputText v-model="cliente.colonia" placeholder="Colonia" />
-                                </div>
-                                <div class="form-field">
-                                    <label>Ciudad</label>
-                                    <InputText v-model="cliente.ciudad" placeholder="Ciudad" />
-                                </div>
-                                <div class="form-field">
-                                    <label>Estado</label>
-                                    <InputText v-model="cliente.estado" placeholder="Edo." />
-                                </div>
-                                <div class="form-field">
-                                    <label>C.P.</label>
-                                    <InputText v-model="cliente.cp" placeholder="C.P." />
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Email</label>
-                                    <InputText v-model="cliente.email" placeholder="correo@ejemplo.com" />
-                                </div>
-                                <div class="form-field">
-                                    <label>Teléfono</label>
-                                    <InputText v-model="cliente.telefono" placeholder="Teléfono fijo" />
-                                </div>
-                                <div class="form-field">
-                                    <label>Contacto</label>
-                                    <InputText v-model="cliente.contacto" placeholder="Persona de contacto" />
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </Card>
+                <ClienteForm v-model="cliente" />
 
                 <!-- Información del Equipo -->
                 <Card class="section-card">
@@ -441,10 +375,17 @@ import { useOrdenServicio } from '../composables/useOrdenServicio'
 import { useOrdenServicioService } from '../composables/useOrdenServicioService'
 import { useRouter, useRoute } from 'vue-router'
 import { useToast } from '../composables/useToast'
+import { useClienteService } from '../composables/useClienteService'
+import { useEquipoService } from '../composables/useEquipoService'
+import ClienteForm from '../components/ClienteForm.vue'
 
 // Composables
 const { calcularSubtotal, calcularTotal } = useOrdenServicio()
 const ordenService = useOrdenServicioService()
+const clienteService = useClienteService();
+const equipoService = useEquipoService();
+
+
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
@@ -454,7 +395,7 @@ const loading = ref<boolean>(false)
 const ordenId = ref<string | null>(null)
 
 // Data
-const ordenNumero = ref<string>('5460')
+const ordenNumero = ref<string>('')
 const fechaActual = ref<string>(new Date().toLocaleDateString('es-MX', { 
     day: '2-digit', 
     month: '2-digit', 
@@ -462,37 +403,37 @@ const fechaActual = ref<string>(new Date().toLocaleDateString('es-MX', {
 }))
 
 const cliente = ref<Cliente>({
-    nombre: 'CESAR EDUARDO BASURTO',
-    celular: '8119915324',
+    nombre: '',
+    celular: '',
     domicilio: '',
     rfc: '',
     colonia: '',
     ciudad: '',
     estado: '',
     cp: '',
-    email: 'AGENCIA@FMVISA.COM.MX',
+    email: '',
     telefono: '',
     contacto: ''
 })
 
 const equipo = ref<Equipo>({
-    marca: 'CANON',
-    modelo: 'EOS R50',
-    noSerie: '1234567890',
-    tipo: 'CAMARA MIRRORLESS',
-    falla: 'No enciende el equipo, se apaga solo después de unos segundos.',
-    accesorios: 'Batería, cargador, tapa de cuerpo'
+    marca: '',
+    modelo: '',
+    noSerie: '',
+    tipo: '',
+    falla: '',
+    accesorios: ''
 })
 
 const fechas = ref<Fechas>({
-    ingreso: new Date('2025-10-20'),
-    salida: new Date('2025-11-05'),
+    ingreso: null,
+    salida: null,
     autorizacion: null,
     llegadaRefaccion: null
 })
 
 const estado = ref<EstadoEquipo>({
-    pendiente: 'PAGO $300 EN EFECTIVO 5 NOV 25',
+    pendiente: '',
     enviadoANombre: '',
     fechaEnvio: null,
     notasEnvio: '',
@@ -501,10 +442,7 @@ const estado = ref<EstadoEquipo>({
     descripcionReparacion: ''
 })
 
-const historial = ref<HistorialItem[]>([
-    { fecha: '17/02/2026', accion: 'Creación de orden', usuario: 'Admin' },
-    { fecha: '17/02/2026', accion: 'Actualización de datos', usuario: 'Admin' }
-])
+const historial = ref<HistorialItem[]>([])
 
 const estadoOrden = ref<EstadoOrden>('Refacción')
 const referencias = ref<ReferenciaTipo>('Garantia')
@@ -512,8 +450,8 @@ const tipoCargo = ref<TipoCargo>('CargoRegular')
 
 const financiero = ref<Financiero>({
     presupuesto: 0.00,
-    revision: 300,
-    anticipo: 300,
+    revision: 0.00,
+    anticipo: 0.00,
     pagos: 0.00,
     iva: 0.00
 })

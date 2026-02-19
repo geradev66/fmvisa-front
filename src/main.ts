@@ -32,6 +32,8 @@ import TabPanel from 'primevue/tabpanel';
 import Textarea from 'primevue/textarea';
 import Calendar from 'primevue/calendar';
 import InputNumber from 'primevue/inputnumber';
+import AutoComplete from 'primevue/autocomplete';
+
 import router from './router';
 import { AuthService } from './services/AuthService';
 import { ClienteService } from './services/ClienteService';
@@ -78,6 +80,7 @@ app.component('TabPanel', TabPanel);
 app.component('Textarea', Textarea);
 app.component('Calendar', Calendar);
 app.component('InputNumber', InputNumber);
+app.component('AutoComplete', AutoComplete);
 // Register more components as needed
 
 //Pinia

@@ -1,8 +1,8 @@
 import axios, { type AxiosInstance } from 'axios'
-import type { 
-    Cliente, 
-    CrearClienteDTO, 
-    ActualizarClienteDTO 
+import type {
+    Cliente,
+    CrearClienteDTO,
+    ActualizarClienteDTO
 } from '../models/cliente'
 
 export class ClienteService {
@@ -20,7 +20,7 @@ export class ClienteService {
 
         // Interceptor para agregar token de autenticación
         this.api.interceptors.request.use((config) => {
-            const token = localStorage.getItem('authToken')
+            const token = localStorage.getItem('auth_token')
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`
             }
@@ -49,8 +49,24 @@ export class ClienteService {
         estado?: string
         fechaDesde?: string
         fechaHasta?: string
-    }): Promise<{ clientes: Cliente[]; total: number }> {
-        const response = await this.api.get<{ clientes: Cliente[]; total: number }>('/', { params })
+    }): Promise<{
+        data: Cliente[],
+        pagination: {
+            currentPage: number,
+            totalPages: number,
+            totalItems: number,
+            itemsPerPage: number
+        }
+    }> {
+        const response = await this.api.get<{
+            data: Cliente[],
+            pagination: {
+                currentPage: number,
+                totalPages: number,
+                totalItems: number,
+                itemsPerPage: number
+            }
+        }>('/', { params })
         return response.data
     }
 
@@ -63,5 +79,5 @@ export class ClienteService {
         await this.api.delete(`/${id}`)
     }
 
-    
+
 }
