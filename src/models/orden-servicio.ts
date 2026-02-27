@@ -1,30 +1,5 @@
-// interfaces/orden-servicio.ts
-
-export interface Cliente {
-    _id?: string;
-    id?: string;
-    nombre: string;
-    celular: string;
-    domicilio: string;
-    rfc: string;
-    colonia: string;
-    ciudad: string;
-    estado: string;
-    cp: string;
-    email: string;
-    telefono: string;
-    contacto: string;
-}
-
-export interface Equipo {
-    id?: string;
-    marca: string;
-    modelo: string;
-    noSerie: string;
-    tipo: string;
-    falla: string;
-    accesorios: string;
-}
+import type { Cliente } from "./cliente";
+import type { Equipo } from "./equipo";
 
 export interface Fechas {
     ingreso: Date | null;
@@ -82,8 +57,8 @@ export interface OrdenServicio {
     id?: string;
     numeroOrden: string;
     fechaCreacion: Date;
-    cliente: Cliente;
-    equipo: Equipo;
+    cliente?: Cliente;
+    equipo?: Equipo;
     fechas: Fechas;
     estado: EstadoEquipo;
     estadoOrden: EstadoOrden;
@@ -95,8 +70,8 @@ export interface OrdenServicio {
 
 // DTOs para API
 export interface CrearOrdenServicioDTO {
-    cliente: Cliente;
-    equipo: Equipo;
+    cliente?: Cliente;
+    equipo?: Equipo;
     fechas: Fechas;
 }
 

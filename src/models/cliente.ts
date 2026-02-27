@@ -1,5 +1,6 @@
 export interface Cliente {
     id?: string;
+    folio?: string;
     nombre: string;
     celular: string;
     domicilio: string;

@@ -345,7 +345,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
@@ -360,8 +360,6 @@ import InputNumber from 'primevue/inputnumber'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import type { 
-    Cliente, 
-    Equipo, 
     Fechas, 
     EstadoEquipo, 
     HistorialItem, 
@@ -373,20 +371,16 @@ import type {
 } from '../models/orden-servicio'
 import { useOrdenServicio } from '../composables/useOrdenServicio'
 import { useOrdenServicioService } from '../composables/useOrdenServicioService'
-import { useRouter, useRoute } from 'vue-router'
+import {useRoute } from 'vue-router'
 import { useToast } from '../composables/useToast'
-import { useClienteService } from '../composables/useClienteService'
-import { useEquipoService } from '../composables/useEquipoService'
 import ClienteForm from '../components/ClienteForm.vue'
+import { type Cliente } from '../models/cliente'
+import { type Equipo } from '../models/equipo'
 
 // Composables
-const { calcularSubtotal, calcularTotal } = useOrdenServicio()
+const { calcularSubtotal } = useOrdenServicio()
 const ordenService = useOrdenServicioService()
-const clienteService = useClienteService();
-const equipoService = useEquipoService();
 
-
-const router = useRouter()
 const route = useRoute()
 const toast = useToast()
 
@@ -584,8 +578,12 @@ const cargarOrden = async (id: string) => {
         // Cargar datos en el formulario
         ordenId.value = orden.id || null
         ordenNumero.value = orden.numeroOrden
-        cliente.value = orden.cliente
-        equipo.value = orden.equipo
+        if (orden.cliente) {
+            cliente.value = orden.cliente   
+        }
+        if (orden.equipo) {
+            equipo.value = orden.equipo
+        }
         fechas.value = orden.fechas
         estado.value = orden.estado
         estadoOrden.value = orden.estadoOrden

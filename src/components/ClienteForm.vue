@@ -26,10 +26,10 @@
                             placeholder="Nombre completo"
                             :disabled="loading"
                         />
-                        <div v-if="filteredClientes.length > 0 && !modelValue._id" class="clientes-options">
+                        <div v-if="filteredClientes.length > 0 && !modelValue.id" class="clientes-options">
                             <small class="clientes-found">Clientes encontrados:</small>
                             <ul>
-                                <li @click="selectCliente(item)" v-for="item in filteredClientes" :key="item._id">{{ item.nombre }}</li>
+                                <li @click="selectCliente(item)" v-for="item in filteredClientes" :key="item.id">{{ item.nombre }}</li>
                             </ul>
                         </div>
                     </div>
@@ -138,13 +138,13 @@
         <template #footer>
             <div style="display: flex; justify-content: space-between; gap: 1rem;">
                 <Button 
-                v-if="props.modelValue._id" 
+                v-if="props.modelValue.id" 
                 class="save-button p-button-info"
                 style="width: 100%;"
                 :loading="loading"
                 :disabled="loading"
                 @click="emit('update:modelValue', {
-                    _id: '',
+                    id: '',
                     nombre: '',
                     celular: '',
                     domicilio: '',
@@ -162,7 +162,7 @@
                 Limpiar Cliente
             </Button>         
             <Button 
-                v-if="props.modelValue._id" 
+                v-if="props.modelValue.id" 
                 class="save-button p-button-warn"
                 :loading="loading"
                 style="width: 100%;"
@@ -191,11 +191,11 @@ import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
-import type { Cliente } from '../models/orden-servicio'
+
 import { useClienteService } from '../composables/useClienteService'
 import { ref, onBeforeMount, computed } from 'vue'
-import { AutoCompleteCompleteEvent } from 'primevue'
 import { useToast } from '../composables/useToast'
+import { type Cliente } from '../models/cliente'
 
 interface Props {
     modelValue: Cliente
@@ -212,7 +212,6 @@ const clienteService = useClienteService();
 
 const loading = ref(false)
 const clientes = ref<Cliente[]>([])
-const nombreInput = ref<any>(null)
 const toast = useToast();
 
 const filteredClientes = computed(() => {
@@ -248,14 +247,14 @@ const updateField = (field: keyof Cliente, value: any) => {
     })
 }
 
-const searchClientes = async (event: AutoCompleteCompleteEvent) => {
-    try {
-        console.log('Searching clientes with query:', event.query)
-        // clientes.value = response.data
-    } catch (error) {
-        console.error('Error searching clientes:', error)
-    }
-}
+// const searchClientes = async (event: AutoCompleteCompleteEvent) => {
+//     try {
+//         console.log('Searching clientes with query:', event.query)
+//         // clientes.value = response.data
+//     } catch (error) {
+//         console.error('Error searching clientes:', error)
+//     }
+// }
 
 const selectCliente = (cliente: Cliente) => {
     emit('update:modelValue', cliente)

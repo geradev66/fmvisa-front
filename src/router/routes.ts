@@ -1,4 +1,3 @@
-import HomePage from '../pages/home.vue';
 import OrdenServicioPage from '../pages/orden-servicio.vue';
 import LoginPage from '../pages/login.vue';
 
