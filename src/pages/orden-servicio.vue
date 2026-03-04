@@ -1,5 +1,5 @@
 <template>
-    <div class="orden-servicio-page">
+    <div class="orden-servicio-page" :style="{ zoom: zoom }">
         <!-- Header -->
         <div class="header-section">
             <div class="order-info">
@@ -14,6 +14,31 @@
             <div class="order-date">
                 <span class="date-label">Fecha Actual</span>
                 <div class="date-value">{{ fechaActual }}</div>
+            </div>
+
+            <!-- Zoom Control -->
+            <div class="zoom-control">
+                <span class="zoom-label"><i class="pi pi-search"></i> Zoom</span>
+                <div class="zoom-actions">
+                    <button class="zoom-btn" @click="zoomOut" :disabled="zoom <= 0.5" title="Reducir">
+                        <i class="pi pi-minus"></i>
+                    </button>
+                    <span class="zoom-value">{{ Math.round(zoom * 100) }}%</span>
+                    <button class="zoom-btn" @click="zoomIn" :disabled="zoom >= 1.5" title="Ampliar">
+                        <i class="pi pi-plus"></i>
+                    </button>
+                    <button class="zoom-btn zoom-reset" @click="zoomReset" title="Restablecer">
+                        <i class="pi pi-refresh"></i>
+                    </button>
+                </div>
+                <input
+                    type="range"
+                    class="zoom-slider"
+                    v-model.number="zoom"
+                    min="0.5"
+                    max="1.5"
+                    step="0.05"
+                />
             </div>
         </div>
 
@@ -85,6 +110,18 @@
                                             <InputText v-model="equipo.accesorios" placeholder="Batería, cargador, tapa de cuerpo" />
                                         </div>
                                     </div>
+                                    <div class="form-row">
+                                        <div class="form-field flex-1">
+                                            <label>Observaciones</label>
+                                            <Textarea v-model="equipo.observaciones" rows="4" placeholder="Descripción de las observaciones..." />
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-field flex-1">
+                                            <label>Diagnóstico - Reporte Técnico</label>
+                                            <Textarea v-model="equipo.diagnostico" rows="4" placeholder="Descripción del diagnóstico y reporte técnico..." />
+                                        </div>
+                                    </div>
                                 </div>
                             </TabPanel>
                             <TabPanel value="1">
@@ -101,14 +138,23 @@
                                             <Calendar v-model="fechas.autorizacion" dateFormat="mm/dd/yy" showIcon />
                                         </div>
                                         <div class="form-field">
-                                            <label>Llegada de Refacción</label>
-                                            <Calendar v-model="fechas.llegadaRefaccion" dateFormat="mm/dd/yy" showIcon />
+                                            <label>Fecha de pedido de refacción</label>
+                                            <Calendar v-model="fechas.pedidoRefaccion" dateFormat="mm/dd/yy" showIcon />
+                                        </div>
+                                        <div class="form-field">
+                                            <label>Número de pedido</label>
+                                           <InputText placeholder="Ingrese el número de pedido" />
                                         </div>
                                     </div>
+                                    
                                     <div class="form-row">
                                         <div class="form-field">
                                             <label>Salida</label>
                                             <Calendar v-model="fechas.salida" dateFormat="mm/dd/yy" showIcon />
+                                        </div>
+                                         <div class="form-field">
+                                            <label>Fecha de llegada de refacción</label>
+                                            <Calendar v-model="fechas.llegadaRefaccion" dateFormat="mm/dd/yy" showIcon />
                                         </div>
                                         <div class="form-field">
                                             <label>Fecha Ingreso</label>
@@ -201,6 +247,84 @@
                         </TabView>
                     </template>
                 </Card>
+
+                <!-- Tabla de Refacciones / Partes -->
+                <Card class="section-card">
+                    <template #title>
+                        <div class="card-title">
+                            <i class="pi pi-table"></i>
+                            <span>Refacciones / Partes</span>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="tabla-refacciones">
+                            <div class="tabla-actions">
+                                <Button icon="pi pi-plus" label="Agregar fila" severity="primary" size="small" @click="agregarRefaccion" />
+                                <Button icon="pi pi-trash" label="Eliminar seleccionada" severity="danger" size="small" outlined @click="eliminarRefaccion" :disabled="!refaccionSeleccionada" />
+                            </div>
+                            <DataTable
+                                :value="refacciones"
+                                v-model:selection="refaccionSeleccionada"
+                                selectionMode="single"
+                                dataKey="codigo"
+                                editMode="cell"
+                                @cell-edit-complete="onCellEditComplete"
+                                class="p-datatable-sm refacciones-table"
+                                stripedRows
+                                scrollable
+                            >
+                                <Column field="codigo" header="Código" style="width: 80px; min-width: 80px" frozen>
+                                    <template #body="{ data }">
+                                        <span class="codigo-badge">{{ data.codigo }}</span>
+                                    </template>
+                                </Column>
+                                <Column field="nombre" header="Nombre" style="min-width: 160px">
+                                    <template #editor="{ data, field }">
+                                        <InputText v-model="data[field]" style="width: 100%" />
+                                    </template>
+                                </Column>
+                                <Column field="aparato" header="Aparato" style="min-width: 130px">
+                                    <template #editor="{ data, field }">
+                                        <InputText v-model="data[field]" style="width: 100%" />
+                                    </template>
+                                </Column>
+                                <Column field="cantidad" header="Cantidad" style="width: 100px; min-width: 100px">
+                                    <template #editor="{ data, field }">
+                                        <InputNumber v-model="data[field]" :useGrouping="false" :min="0" style="width: 100%" />
+                                    </template>
+                                </Column>
+                                <Column field="precio" header="Precio" style="width: 110px; min-width: 110px">
+                                    <template #body="{ data }">{{ formatCurrency(data.precio) }}</template>
+                                    <template #editor="{ data, field }">
+                                        <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
+                                    </template>
+                                </Column>
+                                <Column field="costo" header="Costo" style="width: 110px; min-width: 110px">
+                                    <template #body="{ data }">{{ formatCurrency(data.costo) }}</template>
+                                    <template #editor="{ data, field }">
+                                        <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
+                                    </template>
+                                </Column>
+                                <Column field="existencia" header="Existencia" style="width: 110px; min-width: 110px">
+                                    <template #editor="{ data, field }">
+                                        <InputNumber v-model="data[field]" :useGrouping="false" :min="0" style="width: 100%" />
+                                    </template>
+                                </Column>
+                                <Column field="ubicacion" header="Ubicación" style="min-width: 130px">
+                                    <template #editor="{ data, field }">
+                                        <InputText v-model="data[field]" style="width: 100%" />
+                                    </template>
+                                </Column>
+                                <Column field="compraCosto" header="Compra Costo" style="width: 130px; min-width: 130px">
+                                    <template #body="{ data }">{{ formatCurrency(data.compraCosto) }}</template>
+                                    <template #editor="{ data, field }">
+                                        <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
+                                    </template>
+                                </Column>
+                            </DataTable>
+                        </div>
+                    </template>
+                </Card>
             </div>
 
             <!-- Right Column -->
@@ -254,8 +378,8 @@
                             </h4>
                             <div class="radio-grid">
                                 <div class="radio-option">
-                                    <RadioButton v-model="referencias" inputId="garantia" value="Garantia" />
-                                    <label for="garantia">Garantía</label>
+                                    <RadioButton v-model="referencias" inputId="GarantíaDeReparacion" value="Garantia" />
+                                    <label for="GarantíaDeReparacion">Garantía de reparación</label>
                                 </div>
                                 <div class="radio-option">
                                     <RadioButton v-model="referencias" inputId="sinReparacion" value="SinReparacion" />
@@ -294,7 +418,7 @@
                                 </div>
                                 <div class="radio-option">
                                     <RadioButton v-model="tipoCargo" inputId="garantiaVendor" value="GarantiaVendor" />
-                                    <label for="garantiaVendor">Garantía Vendor</label>
+                                    <label for="garantiaVendor">Garantía de venta</label>
                                 </div>
                             </div>
                         </div>
@@ -333,7 +457,7 @@
                             </div>
                             <Divider />
                             <div class="financial-row total">
-                                <label><strong>Subtotal</strong></label>
+                                <label><strong>Total</strong></label>
                                 <span class="total-value">${{ calcularSubtotal(financiero).toFixed(2) }}</span>
                             </div>
                         </div>
@@ -379,6 +503,7 @@ import { useClienteService } from '../composables/useClienteService'
 import { useEquipoService } from '../composables/useEquipoService'
 import ClienteForm from '../components/ClienteForm.vue'
 
+
 // Composables
 const { calcularSubtotal, calcularTotal } = useOrdenServicio()
 const ordenService = useOrdenServicioService()
@@ -389,6 +514,13 @@ const equipoService = useEquipoService();
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
+
+// Zoom
+const zoom = ref<number>(1)
+const zoomStep = 0.1
+const zoomIn = () => { zoom.value = Math.min(1.5, parseFloat((zoom.value + zoomStep).toFixed(2))) }
+const zoomOut = () => { zoom.value = Math.max(0.5, parseFloat((zoom.value - zoomStep).toFixed(2))) }
+const zoomReset = () => { zoom.value = 1 }
 
 // Estados
 const loading = ref<boolean>(false)
@@ -443,6 +575,57 @@ const estado = ref<EstadoEquipo>({
 })
 
 const historial = ref<HistorialItem[]>([])
+
+// Tabla Refacciones / Partes
+interface Refaccion {
+    codigo: number
+    nombre: string
+    aparato: string
+    cantidad: number | null
+    precio: number | null
+    costo: number | null
+    existencia: number | null
+    ubicacion: string
+    compraCosto: number | null
+}
+
+const refacciones = ref<Refaccion[]>([])
+const refaccionSeleccionada = ref<Refaccion | null>(null)
+
+const agregarRefaccion = () => {
+    const nextCodigo = refacciones.value.length > 0
+        ? Math.max(...refacciones.value.map(r => r.codigo)) + 1
+        : 1
+    refacciones.value.push({
+        codigo: nextCodigo,
+        nombre: '',
+        aparato: '',
+        cantidad: null,
+        precio: null,
+        costo: null,
+        existencia: null,
+        ubicacion: '',
+        compraCosto: null
+    })
+}
+
+const eliminarRefaccion = () => {
+    if (!refaccionSeleccionada.value) return
+    refacciones.value = refacciones.value.filter(r => r.codigo !== refaccionSeleccionada.value!.codigo)
+    // Re-numerar códigos
+    refacciones.value.forEach((r, i) => { r.codigo = i + 1 })
+    refaccionSeleccionada.value = null
+}
+
+const onCellEditComplete = (event: any) => {
+    const { data, newValue, field } = event
+    data[field] = newValue
+}
+
+const formatCurrency = (value: number | null): string => {
+    if (value == null) return '—'
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+}
 
 const estadoOrden = ref<EstadoOrden>('Refacción')
 const referencias = ref<ReferenciaTipo>('Garantia')
@@ -657,15 +840,94 @@ onMounted(() => {
 }
 
 /* Header */
+.orden-servicio-page {
+    transition: zoom 0.2s ease;
+}
+
 .header-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     margin-bottom: 1.5rem;
     background: white;
     padding: 1rem 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Zoom Control */
+.zoom-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    min-width: 160px;
+}
+
+.zoom-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.zoom-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.zoom-btn {
+    width: 26px;
+    height: 26px;
+    border: 1px solid #cbd5e1;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #475569;
+    transition: background 0.15s, border-color 0.15s;
+    padding: 0;
+}
+
+.zoom-btn:hover:not(:disabled) {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+.zoom-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.zoom-btn.zoom-reset {
+    color: #64748b;
+}
+
+.zoom-value {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1e293b;
+    min-width: 38px;
+    text-align: center;
+}
+
+.zoom-slider {
+    width: 100%;
+    accent-color: #3b82f6;
+    cursor: pointer;
+    height: 4px;
 }
 
 .order-info {
@@ -896,5 +1158,37 @@ onMounted(() => {
 /* DataTable */
 :deep(.p-datatable) {
     font-size: 0.875rem;
+}
+
+/* Tabla Refacciones */
+.tabla-refacciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tabla-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.refacciones-table :deep(.p-datatable-tbody > tr > td) {
+    padding: 0.35rem 0.5rem;
+}
+
+.refacciones-table :deep(.p-datatable-thead > tr > th) {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.codigo-badge {
+    display: inline-block;
+    background: #e2e8f0;
+    color: #475569;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
 }
 </style>

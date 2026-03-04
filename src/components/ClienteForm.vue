@@ -194,7 +194,7 @@ import ProgressSpinner from 'primevue/progressspinner'
 import type { Cliente } from '../models/orden-servicio'
 import { useClienteService } from '../composables/useClienteService'
 import { ref, onBeforeMount, computed } from 'vue'
-import { AutoCompleteCompleteEvent } from 'primevue'
+import type { AutoCompleteCompleteEvent } from 'primevue'
 import { useToast } from '../composables/useToast'
 
 interface Props {
@@ -212,7 +212,7 @@ const clienteService = useClienteService();
 
 const loading = ref(false)
 const clientes = ref<Cliente[]>([])
-const nombreInput = ref<any>(null)
+// @ts-ignore const nombreInput = ref<any>(null)
 const toast = useToast();
 
 const filteredClientes = computed(() => {

@@ -39,3 +39,6 @@ export class AuthService {
         await this.api.post('/register', { username, password })
     }
 }
+
+
+
