@@ -1,22 +1,29 @@
 <template>
     <div class="orden-servicio-page" :style="{ zoom: zoom }">
-        <!-- Header -->
-        <div class="header-section">
+        <!-- Compact Top Bar -->
+        <div class="top-bar">
             <div class="order-info">
                 <div class="order-badge">
                     <i class="pi pi-hashtag"></i>
                 </div>
                 <div class="order-details">
                     <span class="order-label">Orden de Servicio</span>
-                    <h1 class="order-number">{{ ordenNumero === '' ? 'Nueva Orden' : ordenNumero }}</h1>
+                    <span class="order-number">{{ ordenNumero === '' ? 'Nueva Orden' : ordenNumero }}</span>
                 </div>
             </div>
             <div class="order-date">
-                <span class="date-label">Fecha Actual</span>
-                <div class="date-value">{{ fechaActual }}</div>
+                <span class="date-label">Fecha</span>
+                <span class="date-value">{{ fechaActual }}</span>
             </div>
-
-            <!-- Zoom Control -->
+            <div class="action-buttons">
+                <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" size="small" @click="crearNuevaOrden" />
+                <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined size="small" @click="guardarOrden" :loading="loading" />
+                <Button label="Ticket" icon="pi pi-print" severity="secondary" outlined size="small" @click="imprimirTicket" :disabled="!ordenId" />
+                <Button label="Imprimir" icon="pi pi-file" severity="secondary" outlined size="small" @click="imprimirOrdenCompleta" :disabled="!ordenId" />
+                <Button label="Reporte" icon="pi pi-calendar" severity="secondary" outlined size="small" />
+                <Button label="Salida" icon="pi pi-box" severity="secondary" outlined size="small" />
+                <Button label="Búsqueda" icon="pi pi-search" severity="secondary" outlined size="small" />
+            </div>
             <div class="zoom-control">
                 <span class="zoom-label"><i class="pi pi-search"></i> Zoom</span>
                 <div class="zoom-actions">
@@ -31,438 +38,392 @@
                         <i class="pi pi-refresh"></i>
                     </button>
                 </div>
-                <input
-                    type="range"
-                    class="zoom-slider"
-                    v-model.number="zoom"
-                    min="0.5"
-                    max="1.5"
-                    step="0.05"
-                />
+                <input type="range" class="zoom-slider" v-model.number="zoom" min="0.5" max="1.5" step="0.05" />
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" @click="crearNuevaOrden" />
-            <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined @click="guardarOrden" :loading="loading" />
-            <Button label="Imprimir Ticket" icon="pi pi-print" severity="secondary" outlined @click="imprimirTicket" :disabled="!ordenId" />
-            <Button label="Imprimir Orden" icon="pi pi-file" severity="secondary" outlined @click="imprimirOrdenCompleta" :disabled="!ordenId" />
-            <Button label="Reporte Diario" icon="pi pi-calendar" severity="secondary" outlined />
-            <Button label="Salida Equipos" icon="pi pi-box" severity="secondary" outlined />
-            <Button label="Búsqueda" icon="pi pi-search" severity="secondary" outlined />
-        </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top three columns -->
+            <div class="top-panels">
+                <!-- Panel Cliente -->
+                <div class="panel-cliente">
+                    <ClienteForm v-model="cliente" />
 
-        <!-- Main Content Grid -->
-        <div class="content-grid">
-            <!-- Left Column -->
-            <div class="left-column">
-                <!-- Datos del Cliente -->
-                <ClienteForm v-model="cliente" />
+                </div>
 
-                <!-- Información del Equipo -->
-                <Card class="section-card">
-                    <template #title>
-                        <div class="card-title">
-                            <i class="pi pi-wrench"></i>
-                            <span>Información del Equipo</span>
-                        </div>
-                    </template>
-                    <template #content>
-                        <TabView>
-                            <TabPanel value="0">
-                                <template #header>
-                                    <span class="tab-header">
-                                        <i class="pi pi-wrench"></i>
-                                        <span>Datos Equipo</span>
-                                    </span>
-                                </template>
-                                <div class="form-grid">
-                                    <div class="form-row">
-                                        <div class="form-field">
-                                            <label>Marca</label>
-                                            <InputText v-model="equipo.marca" placeholder="Marca" />
+                <!-- Panel Equipo -->
+                <div class="panel-equipo">
+                    <Card class="section-card equipo-card">
+                        <template #title>
+                            <div class="card-title">
+                                <i class="pi pi-wrench"></i>
+                                <span>Información del Equipo</span>
+                            </div>
+                        </template>
+                        <template #content>
+                            <TabView>
+                                <TabPanel value="0">
+                                    <template #header>
+                                        <span class="tab-header"><i class="pi pi-wrench"></i><span>Datos</span></span>
+                                    </template>
+                                    <div class="form-grid">
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Marca</label>
+                                                <InputText v-model="equipo.marca" placeholder="Marca" />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Modelo</label>
+                                                <InputText v-model="equipo.modelo" placeholder="Modelo" />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>No. Serie</label>
+                                                <InputText v-model="equipo.noSerie" placeholder="Serie" />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Tipo</label>
+                                                <InputText v-model="equipo.tipo" placeholder="Tipo" />
+                                            </div>
                                         </div>
-                                        <div class="form-field">
-                                            <label>Modelo</label>
-                                            <InputText v-model="equipo.modelo" placeholder="Modelo" />
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Falla Reportada</label>
+                                                <Textarea v-model="equipo.falla" rows="2" placeholder="Descripción de la falla..." />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Accesorios</label>
+                                                <InputText v-model="equipo.accesorios" placeholder="Batería, cargador..." />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-field">
-                                            <label>No. Serie</label>
-                                            <InputText v-model="equipo.noSerie" placeholder="Número de serie" />
-                                        </div>
-                                        <div class="form-field">
-                                            <label>Tipo Equipo</label>
-                                            <InputText v-model="equipo.tipo" placeholder="Tipo de equipo" />
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-field flex-1">
-                                            <label>Falla Reportada</label>
-                                            <Textarea v-model="equipo.falla" rows="4" placeholder="Descripción de la falla reportada..." />
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-field flex-1">
-                                            <label>Accesorios</label>
-                                            <InputText v-model="equipo.accesorios" placeholder="Batería, cargador, tapa de cuerpo" />
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-field flex-1">
-                                            <label>Observaciones</label>
-                                            <Textarea v-model="equipo.observaciones" rows="4" placeholder="Descripción de las observaciones..." />
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-field flex-1">
-                                            <label>Diagnóstico - Reporte Técnico</label>
-                                            <Textarea v-model="equipo.diagnostico" rows="4" placeholder="Descripción del diagnóstico y reporte técnico..." />
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Observaciones</label>
+                                                <Textarea v-model="equipo.observaciones" rows="2" placeholder="Observaciones..." />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Diagnóstico</label>
+                                                <Textarea v-model="equipo.diagnostico" rows="2" placeholder="Diagnóstico técnico..." />
+                                            </div>
                                         </div>
                                     </div>
+                                </TabPanel>
+                                <TabPanel value="1">
+                                    <template #header>
+                                        <span class="tab-header"><i class="pi pi-calendar"></i><span>Fechas</span></span>
+                                    </template>
+                                    <div class="form-grid">
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Ingreso</label>
+                                                <Calendar v-model="fechas.ingreso" dateFormat="mm/dd/yy" showIcon />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Salida</label>
+                                                <Calendar v-model="fechas.salida" dateFormat="mm/dd/yy" showIcon />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Autorización</label>
+                                                <Calendar v-model="fechas.autorizacion" dateFormat="mm/dd/yy" showIcon />
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Pedido Refacción</label>
+                                                <Calendar v-model="fechas.pedidoRefaccion" dateFormat="mm/dd/yy" showIcon />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Llegada Refacción</label>
+                                                <Calendar v-model="fechas.llegadaRefaccion" dateFormat="mm/dd/yy" showIcon />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>No. Pedido</label>
+                                                <InputText placeholder="Número de pedido" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </TabPanel>
+                                <TabPanel value="2">
+                                    <template #header>
+                                        <span class="tab-header"><i class="pi pi-clock"></i><span>Pendiente</span></span>
+                                    </template>
+                                    <div class="form-grid">
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Pendiente por:</label>
+                                                <Textarea v-model="estado.pendiente" rows="4" placeholder="Detalles pendientes..." />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </TabPanel>
+                                <TabPanel value="3">
+                                    <template #header>
+                                        <span class="tab-header"><i class="pi pi-send"></i><span>Enviado A</span></span>
+                                    </template>
+                                    <div class="form-grid">
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Enviado A</label>
+                                                <InputText v-model="estado.enviadoANombre" placeholder="Nombre" />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Fecha Envío</label>
+                                                <Calendar v-model="estado.fechaEnvio" dateFormat="mm/dd/yy" showIcon />
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Notas de Envío</label>
+                                                <Textarea v-model="estado.notasEnvio" rows="3" placeholder="Detalles del envío..." />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </TabPanel>
+                                <TabPanel value="4">
+                                    <template #header>
+                                        <span class="tab-header"><i class="pi pi-user"></i><span>Reparado</span></span>
+                                    </template>
+                                    <div class="form-grid">
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Reparado Por</label>
+                                                <InputText v-model="estado.reparadoPor" placeholder="Técnico" />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Fecha Reparación</label>
+                                                <Calendar v-model="estado.fechaReparacion" dateFormat="mm/dd/yy" showIcon />
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-field">
+                                                <label>Descripción</label>
+                                                <Textarea v-model="estado.descripcionReparacion" rows="3" placeholder="Trabajo realizado..." />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </TabPanel>
+                                <TabPanel value="5">
+                                    <template #header>
+                                        <span class="tab-header"><i class="pi pi-history"></i><span>Historial</span></span>
+                                    </template>
+                                    <DataTable :value="historial" stripedRows>
+                                        <Column field="fecha" header="Fecha"></Column>
+                                        <Column field="accion" header="Acción"></Column>
+                                        <Column field="usuario" header="Usuario"></Column>
+                                    </DataTable>
+                                </TabPanel>
+                            </TabView>
+                        </template>
+                    </Card>
+
+                    <!-- Refacciones / Partes -->
+                    <Card class="section-card refacciones-card">
+                        <template #title>
+                            <div class="card-title">
+                                <i class="pi pi-table"></i>
+                                <span>Refacciones / Partes</span>
+                            </div>
+                        </template>
+                        <template #content>
+                            <div class="tabla-refacciones">
+                                <div class="tabla-actions">
+                                    <Button icon="pi pi-plus" label="Agregar" severity="primary" size="small" @click="agregarRefaccion" />
+                                    <Button icon="pi pi-trash" label="Eliminar" severity="danger" size="small" outlined @click="eliminarRefaccion" :disabled="!refaccionSeleccionada" />
                                 </div>
-                            </TabPanel>
-                            <TabPanel value="1">
-                                <template #header>
-                                    <span class="tab-header">
-                                        <i class="pi pi-calendar"></i>
-                                        <span>Fechas</span>
-                                    </span>
-                                </template>
-                                <div class="form-grid">
-                                    <div class="form-row">
-                                        <div class="form-field">
-                                            <label>Autorización</label>
-                                            <Calendar v-model="fechas.autorizacion" dateFormat="mm/dd/yy" showIcon />
-                                        </div>
-                                        <div class="form-field">
-                                            <label>Fecha de pedido de refacción</label>
-                                            <Calendar v-model="fechas.pedidoRefaccion" dateFormat="mm/dd/yy" showIcon />
-                                        </div>
-                                        <div class="form-field">
-                                            <label>Número de pedido</label>
-                                           <InputText placeholder="Ingrese el número de pedido" />
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-row">
-                                        <div class="form-field">
-                                            <label>Salida</label>
-                                            <Calendar v-model="fechas.salida" dateFormat="mm/dd/yy" showIcon />
-                                        </div>
-                                         <div class="form-field">
-                                            <label>Fecha de llegada de refacción</label>
-                                            <Calendar v-model="fechas.llegadaRefaccion" dateFormat="mm/dd/yy" showIcon />
-                                        </div>
-                                        <div class="form-field">
-                                            <label>Fecha Ingreso</label>
-                                            <Calendar v-model="fechas.ingreso" dateFormat="mm/dd/yy" showIcon />
-                                        </div>
-                                    </div>
-                                </div>
-                            </TabPanel>
-                            <TabPanel value="2">
-                                <template #header>
-                                    <span class="tab-header">
-                                        <i class="pi pi-clock"></i>
-                                        <span>Pendiente</span>
-                                    </span>
-                                </template>
-                                <div class="form-grid">
-                                    <div class="form-row">
-                                        <div class="form-field flex-1">
-                                            <label>Pendiente por:</label>
-                                            <Textarea v-model="estado.pendiente" rows="6" placeholder="Detalles pendientes..." />
-                                        </div>
-                                    </div>
-                                </div>
-                            </TabPanel>
-                            <TabPanel value="3">
-                                <template #header>
-                                    <span class="tab-header">
-                                        <i class="pi pi-send"></i>
-                                        <span>Enviado A</span>
-                                    </span>
-                                </template>
-                                <div class="form-grid">
-                                    <div class="form-row">
-                                        <div class="form-field">
-                                            <label>Enviado A</label>
-                                            <InputText v-model="estado.enviadoANombre" placeholder="Nombre del destinatario" />
-                                        </div>
-                                        <div class="form-field">
-                                            <label>Fecha de Envío</label>
-                                            <Calendar v-model="estado.fechaEnvio" dateFormat="mm/dd/yy" showIcon />
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-field flex-1">
-                                            <label>Notas de Envío</label>
-                                            <Textarea v-model="estado.notasEnvio" rows="4" placeholder="Detalles del envío..." />
-                                        </div>
-                                    </div>
-                                </div>
-                            </TabPanel>
-                            <TabPanel value="4">
-                                <template #header>
-                                    <span class="tab-header">
-                                        <i class="pi pi-user"></i>
-                                        <span>Reparado Por</span>
-                                    </span>
-                                </template>
-                                <div class="form-grid">
-                                    <div class="form-row">
-                                        <div class="form-field">
-                                            <label>Reparado Por</label>
-                                            <InputText v-model="estado.reparadoPor" placeholder="Nombre del técnico" />
-                                        </div>
-                                        <div class="form-field">
-                                            <label>Fecha de Reparación</label>
-                                            <Calendar v-model="estado.fechaReparacion" dateFormat="mm/dd/yy" showIcon />
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-field flex-1">
-                                            <label>Descripción de Reparación</label>
-                                            <Textarea v-model="estado.descripcionReparacion" rows="4" placeholder="Detalle del trabajo realizado..." />
-                                        </div>
-                                    </div>
-                                </div>
-                            </TabPanel>
-                            <TabPanel value="5">
-                                <template #header>
-                                    <span class="tab-header">
-                                        <i class="pi pi-history"></i>
-                                        <span>Historial</span>
-                                    </span>
-                                </template>
-                                <DataTable :value="historial" stripedRows>
-                                    <Column field="fecha" header="Fecha"></Column>
-                                    <Column field="accion" header="Acción"></Column>
-                                    <Column field="usuario" header="Usuario"></Column>
+                                <DataTable
+                                    :value="refacciones"
+                                    v-model:selection="refaccionSeleccionada"
+                                    selectionMode="single"
+                                    dataKey="codigo"
+                                    editMode="cell"
+                                    @cell-edit-complete="onCellEditComplete"
+                                    class="p-datatable-sm refacciones-table"
+                                    stripedRows
+                                    scrollable
+                                    scrollHeight="flex"
+                                >
+                                    <Column field="codigo" header="Cód." style="width: 55px; min-width: 55px" frozen>
+                                        <template #body="{ data }">
+                                            <span class="codigo-badge">{{ data.codigo }}</span>
+                                        </template>
+                                    </Column>
+                                    <Column field="nombre" header="Nombre" style="min-width: 140px">
+                                        <template #editor="{ data, field }">
+                                            <InputText v-model="data[field]" style="width: 100%" />
+                                        </template>
+                                    </Column>
+                                    <Column field="aparato" header="Aparato" style="min-width: 110px">
+                                        <template #editor="{ data, field }">
+                                            <InputText v-model="data[field]" style="width: 100%" />
+                                        </template>
+                                    </Column>
+                                    <Column field="cantidad" header="Cant." style="width: 75px; min-width: 75px">
+                                        <template #editor="{ data, field }">
+                                            <InputNumber v-model="data[field]" :useGrouping="false" :min="0" style="width: 100%" />
+                                        </template>
+                                    </Column>
+                                    <Column field="precio" header="Precio" style="width: 95px; min-width: 95px">
+                                        <template #body="{ data }">{{ formatCurrency(data.precio) }}</template>
+                                        <template #editor="{ data, field }">
+                                            <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
+                                        </template>
+                                    </Column>
+                                    <Column field="costo" header="Costo" style="width: 95px; min-width: 95px">
+                                        <template #body="{ data }">{{ formatCurrency(data.costo) }}</template>
+                                        <template #editor="{ data, field }">
+                                            <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
+                                        </template>
+                                    </Column>
+                                    <Column field="existencia" header="Exist." style="width: 75px; min-width: 75px">
+                                        <template #editor="{ data, field }">
+                                            <InputNumber v-model="data[field]" :useGrouping="false" :min="0" style="width: 100%" />
+                                        </template>
+                                    </Column>
+                                    <Column field="ubicacion" header="Ubicación" style="min-width: 110px">
+                                        <template #editor="{ data, field }">
+                                            <InputText v-model="data[field]" style="width: 100%" />
+                                        </template>
+                                    </Column>
+                                    <Column field="compraCosto" header="Compra" style="width: 100px; min-width: 100px">
+                                        <template #body="{ data }">{{ formatCurrency(data.compraCosto) }}</template>
+                                        <template #editor="{ data, field }">
+                                            <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
+                                        </template>
+                                    </Column>
                                 </DataTable>
-                            </TabPanel>
-                        </TabView>
-                    </template>
-                </Card>
+                            </div>
+                        </template>
+                    </Card>
+                </div>
 
-                <!-- Tabla de Refacciones / Partes -->
-                <Card class="section-card">
-                    <template #title>
-                        <div class="card-title">
-                            <i class="pi pi-table"></i>
-                            <span>Refacciones / Partes</span>
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="tabla-refacciones">
-                            <div class="tabla-actions">
-                                <Button icon="pi pi-plus" label="Agregar fila" severity="primary" size="small" @click="agregarRefaccion" />
-                                <Button icon="pi pi-trash" label="Eliminar seleccionada" severity="danger" size="small" outlined @click="eliminarRefaccion" :disabled="!refaccionSeleccionada" />
-                            </div>
-                            <DataTable
-                                :value="refacciones"
-                                v-model:selection="refaccionSeleccionada"
-                                selectionMode="single"
-                                dataKey="codigo"
-                                editMode="cell"
-                                @cell-edit-complete="onCellEditComplete"
-                                class="p-datatable-sm refacciones-table"
-                                stripedRows
-                                scrollable
-                            >
-                                <Column field="codigo" header="Código" style="width: 80px; min-width: 80px" frozen>
-                                    <template #body="{ data }">
-                                        <span class="codigo-badge">{{ data.codigo }}</span>
-                                    </template>
-                                </Column>
-                                <Column field="nombre" header="Nombre" style="min-width: 160px">
-                                    <template #editor="{ data, field }">
-                                        <InputText v-model="data[field]" style="width: 100%" />
-                                    </template>
-                                </Column>
-                                <Column field="aparato" header="Aparato" style="min-width: 130px">
-                                    <template #editor="{ data, field }">
-                                        <InputText v-model="data[field]" style="width: 100%" />
-                                    </template>
-                                </Column>
-                                <Column field="cantidad" header="Cantidad" style="width: 100px; min-width: 100px">
-                                    <template #editor="{ data, field }">
-                                        <InputNumber v-model="data[field]" :useGrouping="false" :min="0" style="width: 100%" />
-                                    </template>
-                                </Column>
-                                <Column field="precio" header="Precio" style="width: 110px; min-width: 110px">
-                                    <template #body="{ data }">{{ formatCurrency(data.precio) }}</template>
-                                    <template #editor="{ data, field }">
-                                        <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
-                                    </template>
-                                </Column>
-                                <Column field="costo" header="Costo" style="width: 110px; min-width: 110px">
-                                    <template #body="{ data }">{{ formatCurrency(data.costo) }}</template>
-                                    <template #editor="{ data, field }">
-                                        <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
-                                    </template>
-                                </Column>
-                                <Column field="existencia" header="Existencia" style="width: 110px; min-width: 110px">
-                                    <template #editor="{ data, field }">
-                                        <InputNumber v-model="data[field]" :useGrouping="false" :min="0" style="width: 100%" />
-                                    </template>
-                                </Column>
-                                <Column field="ubicacion" header="Ubicación" style="min-width: 130px">
-                                    <template #editor="{ data, field }">
-                                        <InputText v-model="data[field]" style="width: 100%" />
-                                    </template>
-                                </Column>
-                                <Column field="compraCosto" header="Compra Costo" style="width: 130px; min-width: 130px">
-                                    <template #body="{ data }">{{ formatCurrency(data.compraCosto) }}</template>
-                                    <template #editor="{ data, field }">
-                                        <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US" style="width: 100%" />
-                                    </template>
-                                </Column>
-                            </DataTable>
-                        </div>
-                    </template>
-                </Card>
-            </div>
+                <!-- Panel Lateral: Estado + Financiero -->
+                <div class="panel-lateral">
 
-            <!-- Right Column -->
-            <div class="right-column">
-                <!-- Estado de la Orden -->
-                <Card class="section-card">
-                    <template #title>
-                        <div class="card-title">
-                            <i class="pi pi-info-circle"></i>
-                            <span>Estado de la Orden</span>
-                            <Tag :value="estadoOrden" :severity="getEstadoSeverity()" class="ml-auto" />
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="radio-section">
-                            <h4 class="section-subtitle">PENDIENTE</h4>
-                            <div class="radio-grid">
-                                <div class="radio-option">
-                                    <RadioButton v-model="estadoOrden" inputId="pendiente" value="Pendiente" />
-                                    <label for="pendiente">Pendiente</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="estadoOrden" inputId="autoriza" value="Autoriza" />
-                                    <label for="autoriza">Autoriza</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="estadoOrden" inputId="informa" value="Informa" />
-                                    <label for="informa">Informa</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="estadoOrden" inputId="refaccion" value="Refacción" />
-                                    <label for="refaccion">Refacción</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="estadoOrden" inputId="entregar" value="Entregar" />
-                                    <label for="entregar">Entregar</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="estadoOrden" inputId="ninguno" value="Ninguno" />
-                                    <label for="ninguno">Ninguno</label>
-                                </div>
+                    <!-- Estado de la Orden -->
+                    <Card class="section-card estado-card">
+                        <template #title>
+                            <div class="card-title">
+                                <i class="pi pi-info-circle"></i>
+                                <span>Estado de la Orden</span>
+                                <Tag :value="estadoOrden" :severity="getEstadoSeverity()" class="ml-auto" />
                             </div>
-                        </div>
-
-                        <Divider />
-
-                        <div class="radio-section">
-                            <h4 class="section-subtitle">
-                                <i class="pi pi-bookmark"></i>
-                                REFERENCIAS
-                            </h4>
-                            <div class="radio-grid">
-                                <div class="radio-option">
-                                    <RadioButton v-model="referencias" inputId="GarantíaDeReparacion" value="Garantia" />
-                                    <label for="GarantíaDeReparacion">Garantía de reparación</label>
+                        </template>
+                        <template #content>
+                            <div class="radio-section">
+                                <h4 class="section-subtitle">PENDIENTE</h4>
+                                <div class="radio-grid">
+                                    <div class="radio-option">
+                                        <RadioButton v-model="estadoOrden" inputId="pendiente" value="Pendiente" />
+                                        <label for="pendiente">Pendiente</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="estadoOrden" inputId="autoriza" value="Autoriza" />
+                                        <label for="autoriza">Autoriza</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="estadoOrden" inputId="informa" value="Informa" />
+                                        <label for="informa">Informa</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="estadoOrden" inputId="refaccion" value="Refacción" />
+                                        <label for="refaccion">Refacción</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="estadoOrden" inputId="entregar" value="Entregar" />
+                                        <label for="entregar">Entregar</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="estadoOrden" inputId="ninguno" value="Ninguno" />
+                                        <label for="ninguno">Ninguno</label>
+                                    </div>
                                 </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="referencias" inputId="sinReparacion" value="SinReparacion" />
-                                    <label for="sinReparacion">Sin Reparación</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="referencias" inputId="noAutorizo" value="NoAutorizo" />
-                                    <label for="noAutorizo">No Autorizo</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="referencias" inputId="reparado" value="Reparado" />
-                                    <label for="reparado">Reparado</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="referencias" inputId="ningunRef" value="Ninguno" />
-                                    <label for="ningunRef">Ninguno</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <Divider />
-
-                        <div class="radio-section">
-                            <h4 class="section-subtitle">
-                                <i class="pi pi-credit-card"></i>
-                                CARGOS
-                            </h4>
-                            <div class="radio-grid">
-                                <div class="radio-option">
-                                    <RadioButton v-model="tipoCargo" inputId="cargoRegular" value="CargoRegular" />
-                                    <label for="cargoRegular">Cargo Regular</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="tipoCargo" inputId="sinCargo" value="SinCargo" />
-                                    <label for="sinCargo">Sin Cargo</label>
-                                </div>
-                                <div class="radio-option">
-                                    <RadioButton v-model="tipoCargo" inputId="garantiaVendor" value="GarantiaVendor" />
-                                    <label for="garantiaVendor">Garantía de venta</label>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </Card>
-
-                <!-- Resumen Financiero -->
-                <Card class="section-card">
-                    <template #title>
-                        <div class="card-title">
-                            <i class="pi pi-dollar"></i>
-                            <span>Resumen Financiero</span>
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="financial-grid">
-                            <div class="financial-row">
-                                <label>Presupuesto</label>
-                                <InputNumber v-model="financiero.presupuesto" mode="currency" currency="USD" locale="en-US" />
-                            </div>
-                            <div class="financial-row">
-                                <label>Revisión</label>
-                                <InputNumber v-model="financiero.revision" mode="currency" currency="USD" locale="en-US" />
-                            </div>
-                            <div class="financial-row">
-                                <label>Anticipo</label>
-                                <InputNumber v-model="financiero.anticipo" mode="currency" currency="USD" locale="en-US" />
-                            </div>
-                            <div class="financial-row">
-                                <label>Pagos</label>
-                                <InputNumber v-model="financiero.pagos" mode="currency" currency="USD" locale="en-US" />
-                            </div>
-                            <div class="financial-row">
-                                <label>IVA</label>
-                                <InputNumber v-model="financiero.iva" mode="currency" currency="USD" locale="en-US" />
                             </div>
                             <Divider />
-                            <div class="financial-row total">
-                                <label><strong>Total</strong></label>
-                                <span class="total-value">${{ calcularSubtotal(financiero).toFixed(2) }}</span>
+                            <div class="radio-section">
+                                <h4 class="section-subtitle"><i class="pi pi-bookmark"></i> REFERENCIAS</h4>
+                                <div class="radio-grid">
+                                    <div class="radio-option">
+                                        <RadioButton v-model="referencias" inputId="GarantíaDeReparacion" value="Garantia" />
+                                        <label for="GarantíaDeReparacion">Gto. reparación</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="referencias" inputId="sinReparacion" value="SinReparacion" />
+                                        <label for="sinReparacion">Sin Reparación</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="referencias" inputId="noAutorizo" value="NoAutorizo" />
+                                        <label for="noAutorizo">No Autorizo</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="referencias" inputId="reparado" value="Reparado" />
+                                        <label for="reparado">Reparado</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="referencias" inputId="ningunRef" value="Ninguno" />
+                                        <label for="ningunRef">Ninguno</label>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </template>
-                </Card>
+                            <Divider />
+                            <div class="radio-section">
+                                <h4 class="section-subtitle"><i class="pi pi-credit-card"></i> CARGOS</h4>
+                                <div class="radio-grid">
+                                    <div class="radio-option">
+                                        <RadioButton v-model="tipoCargo" inputId="cargoRegular" value="CargoRegular" />
+                                        <label for="cargoRegular">Cargo Regular</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="tipoCargo" inputId="sinCargo" value="SinCargo" />
+                                        <label for="sinCargo">Sin Cargo</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <RadioButton v-model="tipoCargo" inputId="garantiaVendor" value="GarantiaVendor" />
+                                        <label for="garantiaVendor">Gto. de venta</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </Card>
+
+                    <!-- Resumen Financiero -->
+                    <Card class="section-card financiero-card">
+                        <template #title>
+                            <div class="card-title">
+                                <i class="pi pi-dollar"></i>
+                                <span>Resumen Financiero</span>
+                            </div>
+                        </template>
+                        <template #content>
+                            <div class="financial-grid">
+                                <div class="financial-row">
+                                    <label>Presupuesto</label>
+                                    <InputNumber v-model="financiero.presupuesto" mode="currency" currency="USD" locale="en-US" />
+                                </div>
+                                <div class="financial-row">
+                                    <label>Revisión</label>
+                                    <InputNumber v-model="financiero.revision" mode="currency" currency="USD" locale="en-US" />
+                                </div>
+                                <div class="financial-row">
+                                    <label>Anticipo</label>
+                                    <InputNumber v-model="financiero.anticipo" mode="currency" currency="USD" locale="en-US" />
+                                </div>
+                                <div class="financial-row">
+                                    <label>Pagos</label>
+                                    <InputNumber v-model="financiero.pagos" mode="currency" currency="USD" locale="en-US" />
+                                </div>
+                                <div class="financial-row">
+                                    <label>IVA</label>
+                                    <InputNumber v-model="financiero.iva" mode="currency" currency="USD" locale="en-US" />
+                                </div>
+                                <Divider />
+                                <div class="financial-row total">
+                                    <label><strong>Total</strong></label>
+                                    <span class="total-value">${{ calcularSubtotal(financiero).toFixed(2) }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </Card>
+                </div>
             </div>
         </div>
     </div>
@@ -500,6 +461,8 @@ import { useToast } from '../composables/useToast'
 import ClienteForm from '../components/ClienteForm.vue'
 import { type Cliente } from '../models/cliente'
 import { type Equipo } from '../models/equipo'
+import { useSettingsStore } from '../stores/SettingsStore'
+import { storeToRefs } from 'pinia'
 
 
 // Composables
@@ -510,11 +473,9 @@ const route = useRoute()
 const toast = useToast()
 
 // Zoom
-const zoom = ref<number>(1)
-const zoomStep = 0.1
-const zoomIn = () => { zoom.value = Math.min(1.5, parseFloat((zoom.value + zoomStep).toFixed(2))) }
-const zoomOut = () => { zoom.value = Math.max(0.5, parseFloat((zoom.value - zoomStep).toFixed(2))) }
-const zoomReset = () => { zoom.value = 1 }
+const settingsStore = useSettingsStore()
+const { zoom } = storeToRefs(settingsStore)
+const { zoomIn, zoomOut, zoomReset } = settingsStore
 
 // Estados
 const loading = ref<boolean>(false)
@@ -831,68 +792,147 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* =============================================
+   PAGE LAYOUT — Full viewport, no scroll
+   ============================================= */
 .orden-servicio-page {
-    padding: 1.5rem;
-    background: #f8f9fa;
-    min-height: 100vh;
-}
-
-/* Header */
-.orden-servicio-page {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0.4rem 0.5rem;
+    background: #f0f4f8;
+    box-sizing: border-box;
+    font-size: 0.78rem;
     transition: zoom 0.2s ease;
 }
 
-.header-section {
+/* =============================================
+   TOP BAR
+   ============================================= */
+.top-bar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: 0.6rem;
+    padding: 0.3rem 0.75rem;
     background: white;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+    margin-bottom: 0.4rem;
 }
 
-/* Zoom Control */
-.zoom-control {
+.order-info {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+}
+
+.order-badge {
+    background: #3b82f6;
+    color: white;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.order-details {
     display: flex;
     flex-direction: column;
+    line-height: 1;
+}
+
+.order-label {
+    font-size: 0.62rem;
+    color: #64748b;
+}
+
+.order-number {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.order-date {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.date-label {
+    font-size: 0.62rem;
+    color: #64748b;
+}
+
+.date-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.3rem;
+    flex: 1;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.action-buttons :deep(.p-button) {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    height: 26px;
+}
+
+.action-buttons :deep(.p-button-icon) {
+    font-size: 0.7rem;
+}
+
+/* Zoom */
+.zoom-control {
+    display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.3rem;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.5rem 0.85rem;
-    min-width: 160px;
+    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+    flex-shrink: 0;
 }
 
 .zoom-label {
-    font-size: 0.75rem;
+    font-size: 0.62rem;
     font-weight: 600;
     color: #64748b;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.2rem;
 }
 
 .zoom-actions {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.25rem;
 }
 
 .zoom-btn {
-    width: 26px;
-    height: 26px;
+    width: 20px;
+    height: 20px;
     border: 1px solid #cbd5e1;
     background: white;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.62rem;
     color: #475569;
     transition: background 0.15s, border-color 0.15s;
     padding: 0;
@@ -909,284 +949,402 @@ onMounted(() => {
     cursor: not-allowed;
 }
 
-.zoom-btn.zoom-reset {
-    color: #64748b;
-}
-
 .zoom-value {
-    font-size: 0.8rem;
+    font-size: 0.68rem;
     font-weight: 700;
     color: #1e293b;
-    min-width: 38px;
+    min-width: 30px;
     text-align: center;
 }
 
 .zoom-slider {
-    width: 100%;
+    width: 65px;
     accent-color: #3b82f6;
     cursor: pointer;
-    height: 4px;
+    height: 3px;
 }
 
-.order-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.order-badge {
-    background: #3b82f6;
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-}
-
-.order-details {
+/* =============================================
+   MAIN CONTENT FLEX COLUMN
+   ============================================= */
+.main-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
+    gap: 0.4rem;
+    overflow: hidden;
+    min-height: 0;
 }
 
-.order-label {
-    font-size: 0.875rem;
-    color: #64748b;
-}
-
-.order-number {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
-    color: #1e293b;
-}
-
-.order-date {
-    text-align: right;
-}
-
-.date-label {
-    font-size: 0.875rem;
-    color: #64748b;
-    display: block;
-}
-
-.date-value {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1e293b;
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.action-buttons :deep(.p-button) {
-    font-size: 0.875rem;
-}
-
-/* Content Grid */
-.content-grid {
+/* Three-column row */
+.top-panels {
+    flex: 1;
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1.5rem;
+    grid-template-columns: 1fr 1.45fr 0.72fr;
+    gap: 0.4rem;
+    overflow: hidden;
+    min-height: 0;
 }
 
-@media (max-width: 1200px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
+.panel-cliente,
+.panel-equipo,
+.panel-lateral {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
-/* Cards */
+.panel-lateral {
+    gap: 0.4rem;
+}
+
+/* Refacciones inside equipo column */
+.refacciones-card {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* =============================================
+   CARDS — Compact PrimeVue overrides
+   ============================================= */
 .section-card {
-    margin-bottom: 1.5rem;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* Make cards fill their column */
+.panel-cliente :deep(.p-card),
+.panel-lateral .estado-card {
+    height: 100%;
+}
+
+:deep(.p-card) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+    border-radius: 6px;
+}
+
+:deep(.p-card .p-card-body) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0.45rem 0.6rem 0.5rem;
+}
+
+:deep(.p-card .p-card-title) {
+    padding: 0;
+    margin-bottom: 0.35rem;
+}
+
+:deep(.p-card .p-card-content) {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+}
+
+:deep(.p-card .p-card-footer) {
+    padding: 0.35rem 0 0;
+}
+
+.equipo-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.panel-equipo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.estado-card {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.financiero-card {
+    flex-shrink: 0;
 }
 
 .card-title {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
+    gap: 0.4rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: #1e293b;
 }
 
 .card-title i {
     color: #3b82f6;
+    font-size: 0.75rem;
 }
 
-/* Form Grid */
+/* =============================================
+   FORM STYLES — Compact
+   ============================================= */
 .form-grid {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.4rem;
 }
 
 .form-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.4rem;
 }
 
 .form-field {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-}
-
-.form-field.flex-1 {
-    grid-column: span 1;
-}
-
-.form-field.flex-2 {
-    grid-column: span 2;
+    gap: 0.15rem;
 }
 
 .form-field label {
-    font-size: 0.875rem;
+    font-size: 0.68rem;
     font-weight: 500;
     color: #475569;
+    line-height: 1;
 }
 
 .form-field :deep(.p-inputtext) {
     width: 100%;
+    font-size: 0.73rem;
+    padding: 0.22rem 0.38rem;
+    height: 27px;
 }
 
-/* Radio Sections */
+.form-field :deep(.p-textarea) {
+    width: 100%;
+    font-size: 0.73rem;
+    padding: 0.22rem 0.38rem;
+    resize: none;
+}
+
+.form-field :deep(.p-calendar) {
+    width: 100%;
+}
+
+.form-field :deep(.p-calendar .p-inputtext) {
+    font-size: 0.73rem;
+    padding: 0.22rem 0.38rem;
+    height: 27px;
+}
+
+.form-field :deep(.p-calendar .p-button) {
+    padding: 0 0.4rem;
+    height: 27px;
+    font-size: 0.7rem;
+}
+
+/* ClienteForm compact overrides */
+.panel-cliente :deep(.p-card-body) {
+    padding: 0.4rem 0.55rem 0.45rem;
+}
+
+.panel-cliente :deep(.form-grid) {
+    gap: 0.35rem;
+}
+
+.panel-cliente :deep(.form-row) {
+    gap: 0.35rem;
+}
+
+.panel-cliente :deep(.form-field) {
+    gap: 0.12rem;
+}
+
+.panel-cliente :deep(.form-field label) {
+    font-size: 0.67rem;
+}
+
+.panel-cliente :deep(.p-inputtext) {
+    font-size: 0.73rem;
+    padding: 0.2rem 0.35rem;
+    height: 26px;
+}
+
+.panel-cliente :deep(.p-button) {
+    font-size: 0.7rem;
+    padding: 0.22rem 0.5rem;
+    height: 26px;
+}
+
+.panel-cliente :deep(.save-button) {
+    margin-top: 0.25rem;
+}
+
+/* =============================================
+   TABS — Compact
+   ============================================= */
+:deep(.p-tabview-nav) {
+    background: transparent;
+}
+
+:deep(.p-tabview-nav-link) {
+    padding: 0.3rem 0.55rem !important;
+}
+
+:deep(.p-tabview-panels) {
+    padding: 0.45rem 0 0;
+}
+
+.tab-header {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+}
+
+.tab-header i {
+    font-size: 0.7rem;
+}
+
+/* =============================================
+   ESTADO / RADIO SECTIONS
+   ============================================= */
 .radio-section {
-    margin-bottom: 1rem;
+    margin-bottom: 0.35rem;
 }
 
 .section-subtitle {
-    font-size: 0.75rem;
+    font-size: 0.62rem;
     font-weight: 600;
     color: #64748b;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.3rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
 }
 
 .radio-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+    gap: 0.2rem 0.4rem;
 }
 
 .radio-option {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.28rem;
 }
 
 .radio-option label {
-    font-size: 0.875rem;
+    font-size: 0.7rem;
     color: #475569;
     cursor: pointer;
+    line-height: 1.2;
 }
 
-/* Financial Grid */
+:deep(.p-radiobutton .p-radiobutton-box) {
+    width: 14px;
+    height: 14px;
+}
+
+:deep(.p-divider) {
+    margin: 0.3rem 0;
+}
+
+/* =============================================
+   FINANCIAL GRID
+   ============================================= */
 .financial-grid {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.28rem;
 }
 
 .financial-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .financial-row label {
-    font-size: 0.875rem;
+    font-size: 0.7rem;
     color: #475569;
     flex-shrink: 0;
 }
 
 .financial-row :deep(.p-inputnumber) {
-    width: 140px;
-    max-width: 140px;
+    width: 115px;
+    max-width: 115px;
     flex-shrink: 0;
 }
 
 .financial-row :deep(.p-inputnumber-input) {
     width: 100%;
-    max-width: 100%;
+    font-size: 0.7rem;
+    padding: 0.18rem 0.32rem;
+    height: 25px;
     text-align: right;
 }
 
 .financial-row.total {
-    margin-top: 0.5rem;
+    margin-top: 0.15rem;
 }
 
 .total-value {
-    font-size: 1.125rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: #1e293b;
 }
 
-/* Tabs */
-.tab-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.tab-header i {
-    font-size: 0.875rem;
-}
-
-:deep(.p-tabview-nav) {
-    background: transparent;
-}
-
-:deep(.p-tabview-panels) {
-    padding: 1rem 0;
-}
-
-/* DataTable */
-:deep(.p-datatable) {
-    font-size: 0.875rem;
-}
-
-/* Tabla Refacciones */
+/* =============================================
+   REFACCIONES TABLE
+   ============================================= */
 .tabla-refacciones {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.3rem;
 }
 
 .tabla-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.35rem;
+}
+
+.tabla-actions :deep(.p-button) {
+    font-size: 0.68rem;
+    padding: 0.18rem 0.4rem;
+    height: 24px;
 }
 
 .refacciones-table :deep(.p-datatable-tbody > tr > td) {
-    padding: 0.35rem 0.5rem;
+    padding: 0.18rem 0.32rem;
+    font-size: 0.7rem;
 }
 
 .refacciones-table :deep(.p-datatable-thead > tr > th) {
-    padding: 0.5rem;
-    font-size: 0.8rem;
+    padding: 0.28rem 0.32rem;
+    font-size: 0.68rem;
     white-space: nowrap;
+}
+
+:deep(.p-datatable) {
+    font-size: 0.73rem;
 }
 
 .codigo-badge {
     display: inline-block;
     background: #e2e8f0;
     color: #475569;
-    border-radius: 4px;
-    padding: 2px 8px;
+    border-radius: 3px;
+    padding: 1px 5px;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.68rem;
 }
 </style>

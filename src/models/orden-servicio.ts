@@ -6,6 +6,7 @@ export interface Fechas {
     salida: Date | null;
     autorizacion: Date | null;
     llegadaRefaccion: Date | null;
+    pedidoRefaccion?: Date | null;
 }
 
 export interface EstadoEquipo {

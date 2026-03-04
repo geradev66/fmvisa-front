@@ -6,6 +6,8 @@ export interface Equipo {
     tipo: string;
     falla: string;
     accesorios: string;
+    diagnostico?: string;
+    observaciones?: string;
 }
 
 export interface CrearEquipoDTO {
