@@ -8,179 +8,149 @@
         </template>
         <template #content>
             <div v-if="loading" class="loading-overlay">
-                <ProgressSpinner 
-                    style="width: 50px; height: 50px" 
-                    strokeWidth="4" 
-                    animationDuration="1s"
-                />
+                <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" animationDuration="1s" />
                 <p class="loading-text">Cargando datos...</p>
             </div>
+            <br>
             <div class="form-grid" :class="{ 'form-disabled': loading }">
                 <div class="form-row">
                     <div class="form-field flex-2">
-                        <label>Nombre</label>
-                        <InputText 
-                            ref="nombreInput"
-                            :modelValue="modelValue.nombre" 
-                            @update:modelValue="updateField('nombre', $event)"
-                            placeholder="Nombre completo"
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+
+                            <InputText id="nombre" ref="nombreInput" :modelValue="modelValue.nombre"
+                                @update:modelValue="updateField('nombre', $event)" :disabled="loading" />
+                            <label for="nombre">Nombre</label>
+                        </FloatLabel>
+
+                        
                         <div v-if="filteredClientes.length > 0 && !modelValue.id" class="clientes-options">
                             <small class="clientes-found">Clientes encontrados:</small>
                             <ul>
-                                <li @click="selectCliente(item)" v-for="item in filteredClientes" :key="item.id">{{ item.nombre }}</li>
+                                <li @click="selectCliente(item)" v-for="item in filteredClientes" :key="item.id">{{
+                                    item.nombre }}</li>
                             </ul>
                         </div>
                     </div>
-                    <div class="form-field">
-                        <label>Celular</label>
-                        <InputText 
-                            :modelValue="modelValue.celular" 
-                            @update:modelValue="updateField('celular', $event)"
-                            placeholder="Número de celular"
-                            :disabled="loading"
-                        />
-                    </div>
                 </div>
+                <div class="form-row flex-2">
+                    <div class="form-field">
+                        <FloatLabel variant="on">
+                            <InputText id="celular" :modelValue="modelValue.celular"
+                                @update:modelValue="updateField('celular', $event)" :disabled="loading" />
+                            <label for="celular">Celular</label>
+                        </FloatLabel>
+                    </div>
 
+                </div>
                 <div class="form-row">
                     <div class="form-field flex-2">
-                        <label>Domicilio</label>
-                        <InputText 
-                            :modelValue="modelValue.domicilio" 
-                            @update:modelValue="updateField('domicilio', $event)"
-                            placeholder="Dirección"
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+                            <InputText id="domicilio" :modelValue="modelValue.domicilio"
+                                @update:modelValue="updateField('domicilio', $event)" :disabled="loading" />
+                            <label for="domicilio">Domicilio</label>
+                        </FloatLabel>
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="form-field">
-                        <label>RFC</label>
-                        <InputText 
-                            :modelValue="modelValue.rfc" 
-                            @update:modelValue="updateField('rfc', $event)"
-                            placeholder="RFC"
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+                            <InputText id="rfc" :modelValue="modelValue.rfc"
+                                @update:modelValue="updateField('rfc', $event)" :disabled="loading" />
+                            <label for="rfc">RFC</label>
+                        </FloatLabel>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-field">
-                        <label>Colonia</label>
-                        <InputText 
-                            :modelValue="modelValue.colonia" 
-                            @update:modelValue="updateField('colonia', $event)"
-                            placeholder="Colonia"
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+                            <InputText id="colonia" :modelValue="modelValue.colonia"
+                                @update:modelValue="updateField('colonia', $event)" :disabled="loading" />
+                            <label for="colonia">Colonia</label>
+                        </FloatLabel>
                     </div>
                     <div class="form-field">
-                        <label>Ciudad</label>
-                        <InputText 
-                            :modelValue="modelValue.ciudad" 
-                            @update:modelValue="updateField('ciudad', $event)"
-                            placeholder="Ciudad"
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+                            <InputText id="ciudad" :modelValue="modelValue.ciudad"
+                                @update:modelValue="updateField('ciudad', $event)" :disabled="loading" />
+                            <label for="ciudad">Ciudad</label>
+                        </FloatLabel>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <FloatLabel variant="on">
+                            <InputText id="estado" :modelValue="modelValue.estado"
+                                @update:modelValue="updateField('estado', $event)" :disabled="loading" />
+                            <label for="estado">Estado</label>
+                        </FloatLabel>
                     </div>
                     <div class="form-field">
-                        <label>Estado</label>
-                        <InputText 
-                            :modelValue="modelValue.estado" 
-                            @update:modelValue="updateField('estado', $event)"
-                            placeholder="Edo."
-                            :disabled="loading"
-                        />
-                    </div>
-                    <div class="form-field">
-                        <label>C.P.</label>
-                        <InputText 
-                            :modelValue="modelValue.cp" 
-                            @update:modelValue="updateField('cp', $event)"
-                            placeholder="C.P."
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+                            <InputText id="cp" :modelValue="modelValue.cp"
+                                @update:modelValue="updateField('cp', $event)" :disabled="loading" />
+                            <label for="cp">C.P.</label>
+                        </FloatLabel>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-field">
-                        <label>Email</label>
-                        <InputText 
-                            :modelValue="modelValue.email" 
-                            @update:modelValue="updateField('email', $event)"
-                            placeholder="correo@ejemplo.com"
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+                            <InputText id="email" :modelValue="modelValue.email"
+                                @update:modelValue="updateField('email', $event)" :disabled="loading" />
+                            <label for="email">Email</label>
+                        </FloatLabel>
                     </div>
                     <div class="form-field">
-                        <label>Teléfono</label>
-                        <InputText 
-                            :modelValue="modelValue.telefono" 
-                            @update:modelValue="updateField('telefono', $event)"
-                            placeholder="Teléfono fijo"
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+                            <InputText id="telefono" :modelValue="modelValue.telefono"
+                                @update:modelValue="updateField('telefono', $event)" :disabled="loading" />
+                            <label for="telefono">Teléfono</label>
+                        </FloatLabel>
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="form-field">
-                        <label>Contacto</label>
-                        <InputText 
-                            :modelValue="modelValue.contacto" 
-                            @update:modelValue="updateField('contacto', $event)"
-                            placeholder="Persona de contacto"
-                            :disabled="loading"
-                        />
+                        <FloatLabel variant="on">
+                            <InputText id="contacto" :modelValue="modelValue.contacto"
+                                @update:modelValue="updateField('contacto', $event)" :disabled="loading" />
+                            <label for="contacto">Contacto</label>
+                        </FloatLabel>
                     </div>
                 </div>
             </div>
         </template>
         <template #footer>
             <div style="display: flex; justify-content: space-between; gap: 1rem;">
-                <Button 
-                v-if="props.modelValue.id" 
-                class="save-button p-button-info"
-                style="width: 100%;"
-                :loading="loading"
-                :disabled="loading"
-                @click="emit('update:modelValue', {
-                    id: '',
-                    nombre: '',
-                    celular: '',
-                    domicilio: '',
-                    rfc: '',
-                    colonia: '',
-                    ciudad: '',
-                    estado: '',
-                    cp: '',
-                    email: '',
-                    telefono: '',
-                    contacto: ''
-                })"
-            >
-                <span class="pi pi-times"></span>
-                Limpiar Cliente
-            </Button>         
-            <Button 
-                v-if="props.modelValue.id" 
-                class="save-button p-button-warn"
-                :loading="loading"
-                style="width: 100%;"
-                :disabled="loading"
-            >
-                <span class="pi pi-save" @click="actualizarCliente()"></span>
-                Actualizar Cliente
-            </Button>
-            <Button 
-                v-else 
-                class="save-button p-button-success"
-                :loading="loading"
-                style="width: 100%;"
-                :disabled="loading"
-            >
-                <span @click="guardarCliente()" class="pi pi-save"></span>
-                Guardar Cliente
-            </Button>
+                <Button v-if="props.modelValue.id" class="save-button p-button-info" style="width: 100%;"
+                    :loading="loading" :disabled="loading" @click="emit('update:modelValue', {
+                        id: '',
+                        nombre: '',
+                        celular: '',
+                        domicilio: '',
+                        rfc: '',
+                        colonia: '',
+                        ciudad: '',
+                        estado: '',
+                        cp: '',
+                        email: '',
+                        telefono: '',
+                        contacto: ''
+                    })">
+                    <span class="pi pi-times"></span>
+                    Limpiar Cliente
+                </Button>
+                <Button v-if="props.modelValue.id" class="save-button p-button-warn" :loading="loading"
+                    style="width: 100%;" :disabled="loading">
+                    <span class="pi pi-save" @click="actualizarCliente()"></span>
+                    Actualizar Cliente
+                </Button>
+                <Button v-else class="save-button p-button-success" :loading="loading" style="width: 100%;"
+                    :disabled="loading">
+                    <span @click="guardarCliente()" class="pi pi-save"></span>
+                    Guardar Cliente
+                </Button>
             </div>
         </template>
     </Card>
@@ -189,6 +159,7 @@
 <script setup lang="ts">
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
+import FloatLabel from 'primevue/floatlabel'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
 
@@ -226,7 +197,7 @@ const filteredClientes = computed(() => {
         return []
     }
     const query = props.modelValue.nombre.toLowerCase()
-    return clientes.value.filter(cliente => 
+    return clientes.value.filter(cliente =>
         cliente.nombre.toLowerCase().includes(query)
     )
 })
@@ -277,7 +248,6 @@ const actualizarCliente = async () => {
 </script>
 
 <style scoped>
-
 .clientes-found {
     font-size: 0.75rem;
     color: #555;
@@ -316,8 +286,13 @@ const actualizarCliente = async () => {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .save-button {
@@ -327,14 +302,14 @@ const actualizarCliente = async () => {
 }
 
 .section-card {
-    margin-bottom: 1.5rem;
+    padding: var(--section-card-padding);
 }
 
 .card-title {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1rem;
+    font-size: var(--card-title-font-size);
     font-weight: 600;
     color: #1e293b;
 }
@@ -346,19 +321,19 @@ const actualizarCliente = async () => {
 .form-grid {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--form-grid-gap);
 }
 
 .form-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    gap: var(--form-grid-gap);
 }
 
 .form-field {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--form-grid-gap);
 }
 
 .form-field.flex-1 {
@@ -369,10 +344,8 @@ const actualizarCliente = async () => {
     grid-column: span 2;
 }
 
-.form-field label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #475569;
+.form-field :deep(.p-floatlabel) {
+    width: 100%;
 }
 
 .form-field :deep(.p-inputtext) {

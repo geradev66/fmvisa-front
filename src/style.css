@@ -3,3 +3,19 @@
 * {
   font-family: 'Inter', sans-serif;
 }
+
+:root {
+  --bg-color: #eaeaea;
+  --text-color: #000000;
+  --top-bar-bg-color: #ffffff;
+  --section-card-padding: 0.75rem;
+  --card-title-font-size: 1rem;
+  --tab-icon-color: #3b82f6;
+  --form-grid-gap: 1rem;
+  color-scheme: light dark; /* Permite adaptación automática */
+}
+
+:root.dark {
+  --bg-color: #1e1e1e;
+  --text-color: #ffffff;
+}
