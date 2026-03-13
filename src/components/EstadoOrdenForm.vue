@@ -9,19 +9,15 @@
         </template>
         <template #content>
             <div class="radio-section">
-                <h4 class="section-subtitle">PENDIENTE</h4>
+                <h4 class="section-subtitle"> PENDIENTE POR</h4>
                 <div class="radio-grid">
                     <div class="radio-option">
-                        <RadioButton :modelValue="estadoOrden" @update:modelValue="emit('update:estadoOrden', $event)" inputId="pendiente" value="Pendiente" />
-                        <label for="pendiente">Pendiente</label>
-                    </div>
-                    <div class="radio-option">
                         <RadioButton :modelValue="estadoOrden" @update:modelValue="emit('update:estadoOrden', $event)" inputId="autoriza" value="Autoriza" />
-                        <label for="autoriza">Autoriza</label>
+                        <label for="autoriza">Autorizar</label>
                     </div>
                     <div class="radio-option">
                         <RadioButton :modelValue="estadoOrden" @update:modelValue="emit('update:estadoOrden', $event)" inputId="informa" value="Informa" />
-                        <label for="informa">Informa</label>
+                        <label for="informa">Información</label>
                     </div>
                     <div class="radio-option">
                         <RadioButton :modelValue="estadoOrden" @update:modelValue="emit('update:estadoOrden', $event)" inputId="refaccion" value="Refacción" />
@@ -43,7 +39,7 @@
                 <div class="radio-grid">
                     <div class="radio-option">
                         <RadioButton :modelValue="referencias" @update:modelValue="emit('update:referencias', $event)" inputId="GarantíaDeReparacion" value="Garantia" />
-                        <label for="GarantíaDeReparacion">Gto. reparación</label>
+                        <label for="GarantíaDeReparacion">Gtia. reparación</label>
                     </div>
                     <div class="radio-option">
                         <RadioButton :modelValue="referencias" @update:modelValue="emit('update:referencias', $event)" inputId="sinReparacion" value="SinReparacion" />
@@ -69,7 +65,7 @@
                 <div class="radio-grid">
                     <div class="radio-option">
                         <RadioButton :modelValue="tipoCargo" @update:modelValue="emit('update:tipoCargo', $event)" inputId="cargoRegular" value="CargoRegular" />
-                        <label for="cargoRegular">Cargo Regular</label>
+                        <label for="cargoRegular">Cargo</label>
                     </div>
                     <div class="radio-option">
                         <RadioButton :modelValue="tipoCargo" @update:modelValue="emit('update:tipoCargo', $event)" inputId="sinCargo" value="SinCargo" />
@@ -77,7 +73,7 @@
                     </div>
                     <div class="radio-option">
                         <RadioButton :modelValue="tipoCargo" @update:modelValue="emit('update:tipoCargo', $event)" inputId="garantiaVendor" value="GarantiaVendor" />
-                        <label for="garantiaVendor">Gto. de venta</label>
+                        <label for="garantiaVendor">Gtia. de venta</label>
                     </div>
                 </div>
             </div>

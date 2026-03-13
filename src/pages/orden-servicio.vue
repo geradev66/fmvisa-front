@@ -7,14 +7,15 @@
                     <i class="pi pi-hashtag"></i>
                 </div>
                 <div class="order-details">
-                    <span class="order-label">Orden de Servicio</span>
-                    <span class="order-number">{{ ordenNumero === '' ? 'Nueva Orden' : ordenNumero }}</span>
+                        <span class="order-label">Orden de Servicio</span>
+                        <span class="order-number">{{ ordenNumero === '' ? 'Nueva Orden' : ordenNumero }}</span>
                 </div>
             </div>
-            <div class="order-date">
-                <span class="date-label">Fecha</span>
-                <span class="date-value">{{ fechaActual }}</span>
-            </div>
+            <FloatLabel variant="on" class="ingreso-floatlabel">
+                <DatePicker id="fechaIngreso" v-model="fechas.ingreso" dateFormat="dd/mm/yy" showIcon size="large" />
+                <label for="fechaIngreso">Fecha Ingreso</label>
+            </FloatLabel>
+            <Badge value="Entregado" size="xlarge" severity="success" class="Badge-entrega"></Badge>
             <div class="action-buttons">
                 <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" size="large" @click="crearNuevaOrden"></Button>
                 <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined size="large" @click="guardarOrden" :loading="loading"></Button>
@@ -23,6 +24,10 @@
                 <Button label="Reporte" icon="pi pi-calendar" severity="secondary" outlined size="large"></Button>
                 <Button label="Salida" icon="pi pi-box" severity="secondary" outlined size="large"></Button>
                 <Button label="Búsqueda" icon="pi pi-search" severity="secondary" outlined size="large" ></Button>
+            </div>
+            <div class="order-date">
+                <span class="date-label">Fecha</span>
+                <span class="date-value">{{ fechaActual }}</span>
             </div>
 
         </div>
@@ -33,8 +38,12 @@
             <div class="top-panels">
                 <!-- Panel Cliente -->
                 <div class="panel-cliente">
-                    <ClienteForm v-model="cliente" />
-
+                    <ClienteForm
+                        v-model="cliente"
+                        v-model:estadoOrden="estadoOrden"
+                        v-model:referencias="referencias"
+                        v-model:tipoCargo="tipoCargo"
+                    />
                 </div>
 
                 <!-- Panel Equipo -->
@@ -47,14 +56,13 @@
                     />
                 </div>
 
-                <!-- Panel Lateral: Estado + Financiero -->
+                <!-- Panel Lateral: Financiero -->
                 <div class="panel-lateral">
-                    <EstadoOrdenForm
-                        v-model:estadoOrden="estadoOrden"
-                        v-model:referencias="referencias"
-                        v-model:tipoCargo="tipoCargo"
+                    <FinancieroForm
+                        v-model:financiero="financiero"
+                        :pendiente="estado.pendiente"
+                        @update:pendiente="estado.pendiente = $event"
                     />
-                    <FinancieroForm v-model:financiero="financiero" />
                 </div>
             </div>
         </div>
@@ -64,6 +72,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import Button from 'primevue/button'
+import DatePicker from 'primevue/datepicker'
+import FloatLabel from 'primevue/floatlabel'
 import type { 
     Fechas, 
     EstadoEquipo, 
@@ -79,10 +89,10 @@ import {useRoute } from 'vue-router'
 import { useToast } from '../composables/useToast'
 import ClienteForm from '../components/ClienteForm.vue'
 import EquipoForm from '../components/EquipoForm.vue'
-import EstadoOrdenForm from '../components/EstadoOrdenForm.vue'
 import FinancieroForm from '../components/FinancieroForm.vue'
 import { type Cliente } from '../models/cliente'
 import { type Equipo } from '../models/equipo'
+import { Badge } from 'primevue'
 
 
 
@@ -435,8 +445,19 @@ onMounted(() => {
     display: flex;
     gap: 0.3rem;
     flex: 1;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: nowrap;
+    align-items: center;
+    padding-left: 4rem;
+}
+
+.ingreso-floatlabel :deep(.p-datepicker-input) {
+    height: 35px;
+    font-size: 0.9rem;
+}
+
+.ingreso-floatlabel :deep(.p-floatlabel label) {
+    font-size: 0.8rem;
 }
 
 .action-buttons :deep(.p-button) {
@@ -575,6 +596,8 @@ onMounted(() => {
     font-size: 13px;
 }
 
-
+.Badge-entrega{
+    margin-left: 1rem;
+}
 
 </style>

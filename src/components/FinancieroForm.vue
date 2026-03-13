@@ -36,6 +36,7 @@
             </div>
         </template>
     </Card>
+    <Pendiente/>
 </template>
 
 <script setup lang="ts">
@@ -44,13 +45,16 @@ import InputNumber from 'primevue/inputnumber'
 import Divider from 'primevue/divider'
 import { useOrdenServicio } from '../composables/useOrdenServicio'
 import type { Financiero } from '../models/orden-servicio'
+import Pendiente from './Pendiente.vue'
 
 interface Props {
     financiero: Financiero
+    pendiente: string
 }
 
 interface Emits {
     (e: 'update:financiero', value: Financiero): void
+    (e: 'update:pendiente', value: string): void
 }
 
 const props = defineProps<Props>()
@@ -65,8 +69,8 @@ const updateField = (field: keyof Financiero, value: number | null) => {
 
 <style scoped>
 .financiero-card {
-    flex: 0.6;
     flex-shrink: 0;
+    flex-grow: 0;
 }
 
 .card-title {

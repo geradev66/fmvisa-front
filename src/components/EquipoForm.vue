@@ -1,23 +1,15 @@
 <template>
     <Card class="section-card equipo-card">
-        <template #title>
-            <div class="card-title">
-                <i class="pi pi-wrench"></i>
-                <span>Información del Equipo</span>
-            </div>
-        </template>
         <template #content>
             <Tabs value="0">
                 <TabList>
                     <Tab value="0"><span class="tab-header"><i class="pi pi-wrench"></i><span>Datos</span></span></Tab>
                     <Tab value="1"><span class="tab-header"><i class="pi pi-calendar"></i><span>Fechas</span></span>
                     </Tab>
-                    <Tab value="2"><span class="tab-header"><i class="pi pi-clock"></i><span>Pendiente</span></span>
+                    <Tab value="2"><span class="tab-header"><i class="pi pi-send"></i><span>Enviado A</span></span>
                     </Tab>
-                    <Tab value="3"><span class="tab-header"><i class="pi pi-send"></i><span>Enviado A</span></span>
-                    </Tab>
-                    <Tab value="4"><span class="tab-header"><i class="pi pi-user"></i><span>Reparado</span></span></Tab>
-                    <Tab value="5"><span class="tab-header"><i class="pi pi-history"></i><span>Historial</span></span>
+                    <Tab value="3"><span class="tab-header"><i class="pi pi-user"></i><span>Reparado</span></span></Tab>
+                    <Tab value="4"><span class="tab-header"><i class="pi pi-history"></i><span>Historial</span></span>
                     </Tab>
                 </TabList>
                 <TabPanels>
@@ -28,28 +20,28 @@
                                     <FloatLabel variant="on">
                                         <InputText size="large" id="marca" :modelValue="equipo.marca"
                                             @update:modelValue="updateEquipo('marca', $event)" />
-                                        <label for="marca">Marca</label>
+                                        <label for="marca">Tipo</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
                                         <InputText size="large" id="modelo" :modelValue="equipo.modelo"
                                             @update:modelValue="updateEquipo('modelo', $event)" />
-                                        <label for="modelo">Modelo</label>
+                                        <label for="modelo">Marca</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
                                         <InputText size="large" id="noSerie" :modelValue="equipo.noSerie"
                                             @update:modelValue="updateEquipo('noSerie', $event)" />
-                                        <label for="noSerie">No. Serie</label>
+                                        <label for="noSerie">Modelo</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
                                         <InputText size="large" id="tipo" :modelValue="equipo.tipo"
                                             @update:modelValue="updateEquipo('tipo', $event)" />
-                                        <label for="tipo">Tipo</label>
+                                        <label for="tipo">Serie</label>
                                     </FloatLabel>
                                 </div>
                             </div>
@@ -76,7 +68,7 @@
                                         <Textarea size="large" id="observaciones" :modelValue="equipo.observaciones"
                                             @update:modelValue="updateEquipo('observaciones', $event)" rows="2"
                                             auto-resize />
-                                        <label for="observaciones">Observaciones</label>
+                                        <label for="observaciones">Diagnóstico</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
@@ -84,7 +76,7 @@
                                         <Textarea size="large" id="diagnostico" :modelValue="equipo.diagnostico"
                                             @update:modelValue="updateEquipo('diagnostico', $event)" rows="2"
                                             auto-resize />
-                                        <label for="diagnostico">Diagnóstico</label>
+                                        <label for="diagnostico">Observaciones</label>
                                     </FloatLabel>
                                 </div>
                             </div>
@@ -94,17 +86,20 @@
                     <TabPanel value="1">
                         <div class="form-grid">
                             <div class="form-row">
+
+
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <label class="field-label">Ingreso</label>
-                                        <DatePicker size="large" :modelValue="fechas.ingreso"
-                                            @update:modelValue="updateFechas('ingreso', $event)" dateFormat="mm/dd/yy"
+                                        <label class="field-label">Fecha de Presupuesto</label>
+                                        <DatePicker size="large" :modelValue="fechas.presupuesto"
+                                            @update:modelValue="updateFechas('presupuesto', $event)" dateFormat="mm/dd/yy"
                                             showIcon />
                                     </FloatLabel>
                                 </div>
+
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <label class="field-label">Salida</label>
+                                        <label class="field-label">Fecha de Salida</label>
                                         <DatePicker size="large" :modelValue="fechas.salida"
                                             @update:modelValue="updateFechas('salida', $event)" dateFormat="mm/dd/yy"
                                             showIcon />
@@ -114,7 +109,7 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <label class="field-label">Autorización</label>
+                                        <label class="field-label">Fecha de Autorización</label>
                                         <DatePicker size="large" :modelValue="fechas.autorizacion"
                                             @update:modelValue="updateFechas('autorizacion', $event)"
                                             dateFormat="mm/dd/yy" showIcon />
@@ -154,21 +149,6 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <Textarea id="pendiente" :modelValue="estado.pendiente"
-                                            @update:modelValue="updateEstado('pendiente', $event)" rows="8"
-                                            auto-resize />
-                                        <label for="pendiente">Pendiente por</label>
-                                    </FloatLabel>
-                                </div>
-                            </div>
-                        </div>
-                    </TabPanel>
-
-                    <TabPanel value="3">
-                        <div class="form-grid">
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <FloatLabel variant="on">
                                         <InputText size="large" id="enviadoANombre" :modelValue="estado.enviadoANombre"
                                             @update:modelValue="updateEstado('enviadoANombre', $event)" />
                                         <label for="enviadoANombre">Enviado A</label>
@@ -195,7 +175,7 @@
                         </div>
                     </TabPanel>
 
-                    <TabPanel value="4">
+                    <TabPanel value="3">
                         <div class="form-grid">
                             <div class="form-row">
                                 <div class="form-field">
@@ -227,7 +207,7 @@
                         </div>
                     </TabPanel>
 
-                    <TabPanel value="5">
+                    <TabPanel value="4">
                         <DataTable :value="historial" stripedRows>
                             <Column field="fecha" header="Fecha"></Column>
                             <Column field="accion" header="Acción"></Column>
@@ -365,6 +345,7 @@ interface Refaccion {
     existencia: number | null
     ubicacion: string
     compraCosto: number | null
+    fechaPresupuesto: Date | null
 }
 
 const refacciones = ref<Refaccion[]>([])
@@ -383,7 +364,8 @@ const agregarRefaccion = () => {
         costo: null,
         existencia: null,
         ubicacion: '',
-        compraCosto: null
+        compraCosto: null,
+        fechaPresupuesto: null
     })
 }
 

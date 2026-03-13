@@ -1,11 +1,5 @@
 <template>
     <Card class="section-card">
-        <template #title>
-            <div class="card-title">
-                <i class="pi pi-user"></i>
-                <span>Datos del Cliente</span>
-            </div>
-        </template>
         <template #content>
             <div v-if="loading" class="loading-overlay">
                 <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" animationDuration="1s" />
@@ -119,6 +113,15 @@
                         </FloatLabel>
                     </div>
                 </div>
+                <Divider />
+                <EstadoOrdenForm
+                    :estadoOrden="estadoOrden"
+                    :referencias="referencias"
+                    :tipoCargo="tipoCargo"
+                    @update:estadoOrden="emit('update:estadoOrden', $event)"
+                    @update:referencias="emit('update:referencias', $event)"
+                    @update:tipoCargo="emit('update:tipoCargo', $event)"
+                />
             </div>
         </template>
         <template #footer>
@@ -146,11 +149,6 @@
                     <span class="pi pi-save" @click="actualizarCliente()"></span>
                     Actualizar Cliente
                 </Button>
-                <Button v-else class="save-button p-button-success" :loading="loading" style="width: 100%;"
-                    :disabled="loading">
-                    <span @click="guardarCliente()" class="pi pi-save"></span>
-                    Guardar Cliente
-                </Button>
             </div>
         </template>
     </Card>
@@ -162,21 +160,27 @@ import InputText from 'primevue/inputtext'
 import FloatLabel from 'primevue/floatlabel'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
+import Divider from 'primevue/divider'
+import EstadoOrdenForm from './EstadoOrdenForm.vue'
 
 import { useClienteService } from '../composables/useClienteService'
 import { ref, onBeforeMount, computed } from 'vue'
-
-// import type { AutoCompleteCompleteEvent } from 'primevue'
-
 import { useToast } from '../composables/useToast'
 import { type Cliente } from '../models/cliente'
+import type { EstadoOrden, ReferenciaTipo, TipoCargo } from '../models/orden-servicio'
 
 interface Props {
     modelValue: Cliente
+    estadoOrden: EstadoOrden
+    referencias: ReferenciaTipo
+    tipoCargo: TipoCargo
 }
 
 interface Emits {
     (e: 'update:modelValue', value: Cliente): void
+    (e: 'update:estadoOrden', value: EstadoOrden): void
+    (e: 'update:referencias', value: ReferenciaTipo): void
+    (e: 'update:tipoCargo', value: TipoCargo): void
 }
 
 const props = defineProps<Props>()
@@ -236,10 +240,6 @@ const updateField = (field: keyof Cliente, value: any) => {
 
 const selectCliente = (cliente: Cliente) => {
     emit('update:modelValue', cliente)
-}
-
-const guardarCliente = async () => {
-    toast.showInfo('Funcionalidad de guardar cliente aún no implementada', 'Próximamente')
 }
 
 const actualizarCliente = async () => {
