@@ -34,7 +34,13 @@
                             <label for="celular">Celular</label>
                         </FloatLabel>
                     </div>
-
+                    <div class="form-field">
+                        <FloatLabel variant="on">
+                            <InputText id="telefono" :modelValue="modelValue.telefono"
+                                @update:modelValue="updateField('telefono', $event)" :disabled="loading" />
+                            <label for="telefono">Teléfono Alternativo</label>
+                        </FloatLabel>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-field flex-2">
@@ -48,59 +54,9 @@
                 <div class="form-row">
                     <div class="form-field">
                         <FloatLabel variant="on">
-                            <InputText id="rfc" :modelValue="modelValue.rfc"
-                                @update:modelValue="updateField('rfc', $event)" :disabled="loading" />
-                            <label for="rfc">RFC</label>
-                        </FloatLabel>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-field">
-                        <FloatLabel variant="on">
-                            <InputText id="colonia" :modelValue="modelValue.colonia"
-                                @update:modelValue="updateField('colonia', $event)" :disabled="loading" />
-                            <label for="colonia">Colonia</label>
-                        </FloatLabel>
-                    </div>
-                    <div class="form-field">
-                        <FloatLabel variant="on">
-                            <InputText id="ciudad" :modelValue="modelValue.ciudad"
-                                @update:modelValue="updateField('ciudad', $event)" :disabled="loading" />
-                            <label for="ciudad">Ciudad</label>
-                        </FloatLabel>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-field">
-                        <FloatLabel variant="on">
-                            <InputText id="estado" :modelValue="modelValue.estado"
-                                @update:modelValue="updateField('estado', $event)" :disabled="loading" />
-                            <label for="estado">Estado</label>
-                        </FloatLabel>
-                    </div>
-                    <div class="form-field">
-                        <FloatLabel variant="on">
-                            <InputText id="cp" :modelValue="modelValue.cp"
-                                @update:modelValue="updateField('cp', $event)" :disabled="loading" />
-                            <label for="cp">C.P.</label>
-                        </FloatLabel>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-field">
-                        <FloatLabel variant="on">
                             <InputText id="email" :modelValue="modelValue.email"
                                 @update:modelValue="updateField('email', $event)" :disabled="loading" />
                             <label for="email">Email</label>
-                        </FloatLabel>
-                    </div>
-                    <div class="form-field">
-                        <FloatLabel variant="on">
-                            <InputText id="telefono" :modelValue="modelValue.telefono"
-                                @update:modelValue="updateField('telefono', $event)" :disabled="loading" />
-                            <label for="telefono">Teléfono</label>
                         </FloatLabel>
                     </div>
                 </div>
@@ -113,7 +69,6 @@
                         </FloatLabel>
                     </div>
                 </div>
-                <Divider />
                 <EstadoOrdenForm
                     :estadoOrden="estadoOrden"
                     :referencias="referencias"

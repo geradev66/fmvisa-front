@@ -10,12 +10,13 @@
                         <span class="order-label">Orden de Servicio</span>
                         <span class="order-number">{{ ordenNumero === '' ? 'Nueva Orden' : ordenNumero }}</span>
                 </div>
+                
             </div>
-            <FloatLabel variant="on" class="ingreso-floatlabel">
-                <DatePicker id="fechaIngreso" v-model="fechas.ingreso" dateFormat="dd/mm/yy" showIcon size="large" />
-                <label for="fechaIngreso">Fecha Ingreso</label>
-            </FloatLabel>
             <Badge value="Entregado" size="xlarge" severity="success" class="Badge-entrega"></Badge>
+            <div class="order-date">
+                <span class="date-label">Fecha</span>
+                <span class="date-value">{{ formatDate(fechas.ingreso) }}</span>
+            </div>
             <div class="action-buttons">
                 <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" size="large" @click="crearNuevaOrden"></Button>
                 <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined size="large" @click="guardarOrden" :loading="loading"></Button>
@@ -23,14 +24,11 @@
                 <Button label="Imprimir" icon="pi pi-file" severity="secondary" outlined size="large" @click="imprimirOrdenCompleta" :disabled="!ordenId"></Button>
                 <Button label="Reporte" icon="pi pi-calendar" severity="secondary" outlined size="large"></Button>
                 <Button label="Salida" icon="pi pi-box" severity="secondary" outlined size="large"></Button>
-                <Button label="Búsqueda" icon="pi pi-search" severity="secondary" outlined size="large" ></Button>
+                <Button label="Búsqueda" icon="pi pi-search" severity="secondary" outlined size="large" @click="mostrarBusqueda = true"></Button>
             </div>
-            <div class="order-date">
-                <span class="date-label">Fecha</span>
-                <span class="date-value">{{ fechaActual }}</span>
-            </div>
-
         </div>
+
+        <BusquedaOrdenesDialog v-model="mostrarBusqueda" @seleccionar="cargarOrdenDesdeDialogo" />
 
         <!-- Main Content -->
         <div class="main-content">
@@ -45,7 +43,6 @@
                         v-model:tipoCargo="tipoCargo"
                     />
                 </div>
-
                 <!-- Panel Equipo -->
                 <div class="panel-equipo">
                     <EquipoForm
@@ -63,6 +60,11 @@
                         :pendiente="estado.pendiente"
                         @update:pendiente="estado.pendiente = $event"
                     />
+                </div>
+
+                <!-- Panel Refacciones: spans cols 2-3 -->
+                <div class="panel-refacciones">
+                    <RefaccionesCard />
                 </div>
             </div>
         </div>
@@ -90,6 +92,8 @@ import { useToast } from '../composables/useToast'
 import ClienteForm from '../components/ClienteForm.vue'
 import EquipoForm from '../components/EquipoForm.vue'
 import FinancieroForm from '../components/FinancieroForm.vue'
+import RefaccionesCard from '../components/RefaccionesCard.vue'
+import BusquedaOrdenesDialog from '../components/BusquedaOrdenesDialog.vue'
 import { type Cliente } from '../models/cliente'
 import { type Equipo } from '../models/equipo'
 import { Badge } from 'primevue'
@@ -105,6 +109,7 @@ const toast = useToast()
 // Estados
 const loading = ref<boolean>(false)
 const ordenId = ref<string | null>(null)
+const mostrarBusqueda = ref(false)
 
 // Data
 const ordenNumero = ref<string>('')
@@ -138,7 +143,7 @@ const equipo = ref<Equipo>({
 })
 
 const fechas = ref<Fechas>({
-    ingreso: null,
+    ingreso: new Date(),
     salida: null,
     autorizacion: null,
     llegadaRefaccion: null
@@ -171,6 +176,19 @@ const financiero = ref<Financiero>({
     iva: 0.00
 })
 
+
+const formatDate = (date: Date | null): string => {
+    if (!date) return '—'
+    return date.toLocaleDateString('es-MX', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+    })
+}
+
+const cargarOrdenDesdeDialogo = (orden: OrdenServicio) => {
+    cargarOrden(orden.id!)
+}
 // Funciones del servicio
 const crearNuevaOrden = () => {
     // Limpiar formulario
@@ -445,10 +463,9 @@ onMounted(() => {
     display: flex;
     gap: 0.3rem;
     flex: 1;
-    justify-content: flex-start;
+    justify-content: flex-end;
     flex-wrap: nowrap;
     align-items: center;
-    padding-left: 4rem;
 }
 
 .ingreso-floatlabel :deep(.p-datepicker-input) {
@@ -485,15 +502,26 @@ onMounted(() => {
 .top-panels {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 1.45fr 0.72fr;
+    grid-template-columns: 1fr 1.75fr 0.72fr;
+    grid-template-rows: 1fr .75fr;
+    grid-template-areas:
+        "cliente equipo lateral"
+        "cliente refacciones refacciones";
     gap: 0.4rem;
     overflow: hidden;
     min-height: 0;
 }
 
-.panel-cliente,
-.panel-equipo,
-.panel-lateral {
+.panel-cliente {
+    grid-area: cliente;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.panel-equipo {
+    grid-area: equipo;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -501,14 +529,20 @@ onMounted(() => {
 }
 
 .panel-lateral {
+    grid-area: lateral;
     gap: 0.4rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
-/* Refacciones inside equipo column */
-.refacciones-card {
-    flex: 1;
-    min-height: 0;
+.panel-refacciones {
+    grid-area: refacciones;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 /* =============================================

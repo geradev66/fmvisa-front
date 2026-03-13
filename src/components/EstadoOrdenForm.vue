@@ -33,7 +33,6 @@
                     </div>
                 </div>
             </div>
-            <Divider />
             <div class="radio-section">
                 <h4 class="section-subtitle"><i class="pi pi-bookmark"></i> REFERENCIAS</h4>
                 <div class="radio-grid">
@@ -59,7 +58,6 @@
                     </div>
                 </div>
             </div>
-            <Divider />
             <div class="radio-section">
                 <h4 class="section-subtitle"><i class="pi pi-credit-card"></i> CARGOS</h4>
                 <div class="radio-grid">
@@ -135,6 +133,8 @@ const getEstadoSeverity = (): string => {
     font-weight: 600;
     font-size: var(--card-title-font-size);
     color: #1e293b;
+    padding: 0;
+    margin: 0;
 }
 
 .card-title i {
@@ -142,9 +142,6 @@ const getEstadoSeverity = (): string => {
     font-size: var(--card-title-font-size);
 }
 
-.radio-section {
-    margin-bottom: 0.35rem;
-}
 
 .section-subtitle {
     font-size: .9rem;
@@ -158,7 +155,7 @@ const getEstadoSeverity = (): string => {
 
 .radio-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.2rem 0.4rem;
 }
 

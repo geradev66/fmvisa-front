@@ -36,7 +36,6 @@
             </div>
         </template>
     </Card>
-    <Pendiente/>
 </template>
 
 <script setup lang="ts">
@@ -45,7 +44,6 @@ import InputNumber from 'primevue/inputnumber'
 import Divider from 'primevue/divider'
 import { useOrdenServicio } from '../composables/useOrdenServicio'
 import type { Financiero } from '../models/orden-servicio'
-import Pendiente from './Pendiente.vue'
 
 interface Props {
     financiero: Financiero
@@ -69,8 +67,9 @@ const updateField = (field: keyof Financiero, value: number | null) => {
 
 <style scoped>
 .financiero-card {
-    flex-shrink: 0;
-    flex-grow: 0;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .card-title {
@@ -91,6 +90,7 @@ const updateField = (field: keyof Financiero, value: number | null) => {
     display: flex;
     flex-direction: column;
     gap: 0.28rem;
+    height: 100%;
 }
 
 .financial-row {
@@ -121,7 +121,7 @@ const updateField = (field: keyof Financiero, value: number | null) => {
 }
 
 .financial-row.total {
-    margin-top: 0.15rem;
+    margin-top: auto;
 }
 
 .total-value {

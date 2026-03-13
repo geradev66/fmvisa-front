@@ -8,6 +8,8 @@ export interface Equipo {
     accesorios: string;
     diagnostico?: string;
     observaciones?: string;
+    pendiente?: string;
+    formaPago?: string;
 }
 
 export interface CrearEquipoDTO {
