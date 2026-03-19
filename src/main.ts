@@ -9,7 +9,7 @@ import 'primeicons/primeicons.css'
 
 // Import services and injection keys
 import { OrdenServicioService } from './services/OrdenServicioService';
-import { AuthServiceKey, ClienteServiceKey, EquipoServiceKey, OrdenServicioServiceKey } from './injection-keys';
+import { AuthServiceKey, ClienteServiceKey, EquipoServiceKey, OrdenServicioServiceKey, RefaccionServiceKey, TecnicoServiceKey } from './injection-keys';
 
 // Import individual components
 import Button from 'primevue/button';
@@ -38,7 +38,8 @@ import router from './router';
 import { AuthService } from './services/AuthService';
 import { ClienteService } from './services/ClienteService';
 import { EquipoService } from './services/EquipoService';
-// Add more components as needed
+import { RefaccionService } from './services/RefaccionService';
+import { TecnicoService } from './services/TecnicoService';
 
 const app = createApp(App);
 app.use(PrimeVue, {
@@ -54,10 +55,14 @@ const ordenServicioService = new OrdenServicioService();
 const authService = new AuthService();
 const clienteService = new ClienteService();
 const equipoService = new EquipoService();
+const refaccionService = new RefaccionService();
+const tecnicoService = new TecnicoService();
 app.provide(OrdenServicioServiceKey, ordenServicioService);
 app.provide(AuthServiceKey, authService);
 app.provide(ClienteServiceKey, clienteService);
 app.provide(EquipoServiceKey, equipoService);
+app.provide(RefaccionServiceKey, refaccionService);
+app.provide(TecnicoServiceKey, tecnicoService);
 
 // Provide more services as needed
 // Register components

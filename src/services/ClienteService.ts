@@ -33,7 +33,7 @@ export class ClienteService {
     async crearCliente(dto: CrearClienteDTO): Promise<Cliente> {
         if (generalConfig.isDemo) {
             const newCliente: Cliente = {
-                id: (ClientesMockDb.length + 1).toString(),
+                _id: (ClientesMockDb.length + 1).toString(),
                 ...dto,
                 estado: 'activo',
             }
@@ -50,7 +50,7 @@ export class ClienteService {
 
     async obtenerCliente(id: string): Promise<Cliente> {
         if (generalConfig.isDemo) {
-            const cliente = ClientesMockDb.find(c => c.id === id)
+            const cliente = ClientesMockDb.find(c => c._id === id)
             if (!cliente) {
                 throw new Error('Cliente no encontrado')
             }
@@ -143,7 +143,7 @@ export class ClienteService {
 
     async actualizarCliente(id: string, dto: ActualizarClienteDTO): Promise<Cliente> {
         if (generalConfig.isDemo) {
-            const clienteIndex = ClientesMockDb.findIndex(c => c.id === id)
+            const clienteIndex = ClientesMockDb.findIndex(c => c._id === id)
             if (clienteIndex === -1) {
                 throw new Error('Cliente no encontrado')
             }
@@ -165,7 +165,7 @@ export class ClienteService {
 
     async eliminarCliente(id: string): Promise<void> {
         if (generalConfig.isDemo) {
-            const clienteIndex = ClientesMockDb.findIndex(c => c.id === id)
+            const clienteIndex = ClientesMockDb.findIndex(c => c._id === id)
             if (clienteIndex === -1) {
                 throw new Error('Cliente no encontrado')
             }

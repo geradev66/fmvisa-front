@@ -30,6 +30,18 @@
 
         <BusquedaOrdenesDialog v-model="mostrarBusqueda" @seleccionar="cargarOrdenDesdeDialogo" />
 
+        <!-- Diálogo: Restaurar borrador -->
+        <Dialog v-model:visible="dialogoRestaurarVisible" header="Borrador no guardado" :modal="true" :closable="false" :style="{ width: '400px' }">
+            <p style="margin: 0; line-height: 1.6;">
+                <i class="pi pi-exclamation-triangle" style="color: #f59e0b; margin-right: 0.5rem;"></i>
+                Se encontró un borrador guardado el <strong>{{ fechaBorrador }}</strong>. ¿Deseas restaurarlo?
+            </p>
+            <template #footer>
+                <Button label="Descartar" severity="secondary" @click="descartarBorrador" />
+                <Button label="Restaurar" icon="pi pi-undo" @click="restaurarDesdeCache" />
+            </template>
+        </Dialog>
+
         <!-- Main Content -->
         <div class="main-content">
             <!-- Top three columns -->
@@ -64,7 +76,7 @@
 
                 <!-- Panel Refacciones: spans cols 2-3 -->
                 <div class="panel-refacciones">
-                    <RefaccionesCard />
+                    <RefaccionesCard v-model="refacciones" />
                 </div>
             </div>
         </div>
@@ -72,10 +84,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watchEffect, watch } from 'vue'
 import Button from 'primevue/button'
-import DatePicker from 'primevue/datepicker'
-import FloatLabel from 'primevue/floatlabel'
+import { Badge } from 'primevue'
 import type { 
     Fechas, 
     EstadoEquipo, 
@@ -84,7 +95,8 @@ import type {
     EstadoOrden,
     ReferenciaTipo,
     TipoCargo,
-    OrdenServicio
+    OrdenServicio,
+    RefaccionItem
 } from '../models/orden-servicio'
 import { useOrdenServicioService } from '../composables/useOrdenServicioService'
 import {useRoute } from 'vue-router'
@@ -96,7 +108,7 @@ import RefaccionesCard from '../components/RefaccionesCard.vue'
 import BusquedaOrdenesDialog from '../components/BusquedaOrdenesDialog.vue'
 import { type Cliente } from '../models/cliente'
 import { type Equipo } from '../models/equipo'
-import { Badge } from 'primevue'
+import Dialog from 'primevue/dialog'
 
 
 
@@ -106,18 +118,13 @@ const ordenService = useOrdenServicioService()
 const route = useRoute()
 const toast = useToast()
 
-// Estados
+// Estado
 const loading = ref<boolean>(false)
 const ordenId = ref<string | null>(null)
 const mostrarBusqueda = ref(false)
 
 // Data
 const ordenNumero = ref<string>('')
-const fechaActual = ref<string>(new Date().toLocaleDateString('es-MX', { 
-    day: '2-digit', 
-    month: '2-digit', 
-    year: 'numeric' 
-}))
 
 const cliente = ref<Cliente>({
     nombre: '',
@@ -156,13 +163,15 @@ const estado = ref<EstadoEquipo>({
     notasEnvio: '',
     reparadoPor: '',
     fechaReparacion: null,
-    descripcionReparacion: ''
+    descripcionReparacion: '',
+    noPedido: ''
 })
 
 const historial = ref<HistorialItem[]>([])
 
-// Removed: refacciones, refaccionSeleccionada, agregarRefaccion, eliminarRefaccion,
-// onCellEditComplete, formatCurrency — all moved to EquipoForm.vue
+const refacciones = ref<RefaccionItem[]>([])
+
+// Removed comment
 
 const estadoOrden = ref<EstadoOrden>('Refacción')
 const referencias = ref<ReferenciaTipo>('Garantia')
@@ -176,6 +185,100 @@ const financiero = ref<Financiero>({
     iva: 0.00
 })
 
+// ── Auto-guardado en caché local ──
+const CACHE_KEY = 'fm_orden_draft'
+const dialogoRestaurarVisible = ref(false)
+const fechaBorrador = ref('')
+
+const guardarEnCache = () => {
+    try {
+        const draft = {
+            ordenId: ordenId.value,
+            ordenNumero: ordenNumero.value,
+            cliente: cliente.value,
+            equipo: equipo.value,
+            fechas: fechas.value,
+            estado: estado.value,
+            estadoOrden: estadoOrden.value,
+            referencias: referencias.value,
+            tipoCargo: tipoCargo.value,
+            financiero: financiero.value,
+            historial: historial.value,
+            refacciones: refacciones.value,
+            _guardadoEn: new Date().toISOString()
+        }
+        localStorage.setItem(CACHE_KEY, JSON.stringify(draft))
+    } catch { /* cuota excedida, ignorar */ }
+}
+
+const parseFechas = (raw: any) => {
+    const result: any = {}
+    for (const key in raw) {
+        result[key] = raw[key] ? new Date(raw[key]) : null
+    }
+    return result
+}
+
+const restaurarDesdeCache = () => {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return
+    try {
+        const d = JSON.parse(raw)
+        ordenId.value = d.ordenId ?? null
+        ordenNumero.value = d.ordenNumero ?? ''
+        if (d.cliente) cliente.value = d.cliente
+        if (d.equipo) equipo.value = d.equipo
+        if (d.fechas) fechas.value = parseFechas(d.fechas)
+        if (d.estado) estado.value = {
+            ...d.estado,
+            fechaEnvio: d.estado.fechaEnvio ? new Date(d.estado.fechaEnvio) : null,
+            fechaReparacion: d.estado.fechaReparacion ? new Date(d.estado.fechaReparacion) : null,
+        }
+        if (d.estadoOrden) estadoOrden.value = d.estadoOrden
+        if (d.referencias) referencias.value = d.referencias
+        if (d.tipoCargo) tipoCargo.value = d.tipoCargo
+        if (d.financiero) financiero.value = d.financiero
+        if (d.historial) historial.value = d.historial
+        if (Array.isArray(d.refacciones)) {
+            refacciones.value = d.refacciones.map((r: any) => ({
+                ...r,
+                fechaPresupuesto: r.fechaPresupuesto ? new Date(r.fechaPresupuesto) : null
+            }))
+        }
+        dialogoRestaurarVisible.value = false
+        toast.showSuccess('Borrador restaurado correctamente', 'Borrador')
+    } catch {
+        localStorage.removeItem(CACHE_KEY)
+    }
+}
+
+const descartarBorrador = () => {
+    localStorage.removeItem(CACHE_KEY)
+    dialogoRestaurarVisible.value = false
+}
+
+const limpiarCache = () => localStorage.removeItem(CACHE_KEY)
+
+// Guardar en caché cada vez que cambia cualquier dato del formulario
+watch(
+    [ordenId, ordenNumero, cliente, equipo, fechas, estado, estadoOrden, referencias, tipoCargo, financiero, historial, refacciones],
+    guardarEnCache,
+    { deep: true }
+)
+
+// Actualizar campos financieros calculables cuando cambien las refacciones
+watchEffect(() => {
+    const partidas = refacciones.value
+    const revision = partidas.find(r => r.nombre?.toUpperCase().trim() === 'REVISION')
+    const revisionMonto = revision ? ((revision.precio ?? 0) * (revision.cantidad ?? 1)) : 0
+    const presupuesto = partidas
+        .filter(r => r.nombre?.toUpperCase().trim() !== 'REVISION')
+        .reduce((acc, r) => acc + ((r.precio ?? 0) * (r.cantidad ?? 1)), 0)
+    const iva = (presupuesto + revisionMonto) * 0.16
+    financiero.value.presupuesto = presupuesto
+    financiero.value.revision = revisionMonto
+    financiero.value.iva = iva
+})
 
 const formatDate = (date: Date | null): string => {
     if (!date) return '—'
@@ -187,10 +290,11 @@ const formatDate = (date: Date | null): string => {
 }
 
 const cargarOrdenDesdeDialogo = (orden: OrdenServicio) => {
-    cargarOrden(orden.id!)
+    cargarOrden(orden._id!)
 }
 // Funciones del servicio
 const crearNuevaOrden = () => {
+    limpiarCache()
     // Limpiar formulario
     ordenId.value = null
     ordenNumero.value = ''
@@ -229,7 +333,8 @@ const crearNuevaOrden = () => {
         notasEnvio: '',
         reparadoPor: '',
         fechaReparacion: null,
-        descripcionReparacion: ''
+        descripcionReparacion: '',
+        noPedido: ''
     }
     estadoOrden.value = 'Pendiente'
     referencias.value = 'Ninguno'
@@ -241,6 +346,7 @@ const crearNuevaOrden = () => {
         pagos: 0.00,
         iva: 0.00
     }
+    refacciones.value = []
 }
 
 const guardarOrden = async () => {
@@ -248,7 +354,7 @@ const guardarOrden = async () => {
         loading.value = true
         
         const ordenData: OrdenServicio = {
-            id: ordenId.value || undefined,
+            _id: ordenId.value || undefined,
             numeroOrden: ordenNumero.value,
             fechaCreacion: new Date(),
             cliente: cliente.value,
@@ -259,8 +365,11 @@ const guardarOrden = async () => {
             referencias: referencias.value,
             tipoCargo: tipoCargo.value,
             financiero: financiero.value,
-            historial: historial.value
+            historial: historial.value,
+            refacciones: refacciones.value
         }
+
+        
 
         if (ordenId.value) {
             // Actualizar orden existente
@@ -271,15 +380,15 @@ const guardarOrden = async () => {
             toast.showSuccess(`Orden #${ordenNumero.value} actualizada correctamente`, 'Orden Actualizada')
         } else {
             // Crear nueva orden
-            const nuevaOrden = await ordenService.crearOrden({
-                cliente: cliente.value,
-                equipo: equipo.value,
-                fechas: fechas.value
-            })
-            ordenId.value = nuevaOrden.id || null
+            const nuevaOrden = await ordenService.crearOrden(
+                ordenData
+            )
+            ordenId.value = nuevaOrden._id || null
             ordenNumero.value = nuevaOrden.numeroOrden
             toast.showSuccess(`Orden #${nuevaOrden.numeroOrden} creada exitosamente`, 'Orden Creada')
         }
+
+        limpiarCache()
 
         // Agregar entrada al historial
         historial.value.push({
@@ -302,7 +411,7 @@ const cargarOrden = async (id: string) => {
         const orden = await ordenService.obtenerOrden(id)
         
         // Cargar datos en el formulario
-        ordenId.value = orden.id || null
+        ordenId.value = orden._id || null
         ordenNumero.value = orden.numeroOrden
         if (orden.cliente) {
             cliente.value = orden.cliente   
@@ -310,13 +419,23 @@ const cargarOrden = async (id: string) => {
         if (orden.equipo) {
             equipo.value = orden.equipo
         }
-        fechas.value = orden.fechas
-        estado.value = orden.estado
+        fechas.value = parseFechas(orden.fechas)
+        estado.value = {
+            ...orden.estado,
+            fechaEnvio: orden.estado.fechaEnvio ? new Date(orden.estado.fechaEnvio) : null,
+            fechaReparacion: orden.estado.fechaReparacion ? new Date(orden.estado.fechaReparacion) : null,
+        }
         estadoOrden.value = orden.estadoOrden
         referencias.value = orden.referencias
         tipoCargo.value = orden.tipoCargo
         financiero.value = orden.financiero
         historial.value = orden.historial
+        if (Array.isArray(orden.refacciones)) {
+            refacciones.value = orden.refacciones.map(r => ({
+                ...r,
+                fechaPresupuesto: r.fechaPresupuesto ? new Date(r.fechaPresupuesto) : null
+            }))
+        }
     } catch (error) {
         console.error('Error al cargar orden:', error)
         alert('Error al cargar la orden.')
@@ -365,10 +484,23 @@ const imprimirOrdenCompleta = async () => {
 
 // Lifecycle
 onMounted(() => {
-    // Si hay un ID en la ruta, cargar la orden
     const id = route.params.id as string
     if (id) {
         cargarOrden(id)
+    } else {
+        // Verificar si hay un borrador guardado
+        const raw = localStorage.getItem(CACHE_KEY)
+        if (raw) {
+            try {
+                const d = JSON.parse(raw)
+                if (d._guardadoEn) {
+                    fechaBorrador.value = new Date(d._guardadoEn).toLocaleString('es-MX')
+                }
+                dialogoRestaurarVisible.value = true
+            } catch {
+                localStorage.removeItem(CACHE_KEY)
+            }
+        }
     }
 })
 </script>

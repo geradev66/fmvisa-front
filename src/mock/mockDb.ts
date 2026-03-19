@@ -1,10 +1,12 @@
 import type { Cliente } from "../models/cliente";
 import type { Equipo } from "../models/equipo";
 import type { OrdenServicio } from "../models/orden-servicio";
+import type { Refaccion } from "../models/refaccion";
+import type { Tecnico } from "../models/tecnico";
 
 export let ClientesMockDb : Cliente[] = [ 
     {
-        id: "1",
+        _id: "1",
         nombre: "Comercializadora del Norte S.A. de C.V.",
         celular: "8181234567",
         domicilio: "Av. Constitución 1234",
@@ -18,7 +20,7 @@ export let ClientesMockDb : Cliente[] = [
         contacto: "Juan Pérez García"
     },
     {
-        id: "2",
+        _id: "2",
         nombre: "Tecnologías Industriales de México S.A.",
         celular: "5512345678",
         domicilio: "Blvd. Miguel de Cervantes Saavedra 301",
@@ -32,7 +34,7 @@ export let ClientesMockDb : Cliente[] = [
         contacto: "María Fernández López"
     },
     {
-        id: "3",
+        _id: "3",
         nombre: "Distribuidora Guadalajara S.C.",
         celular: "3331234567",
         domicilio: "Av. Vallarta 2500",
@@ -46,7 +48,7 @@ export let ClientesMockDb : Cliente[] = [
         contacto: "Roberto Sánchez Martínez"
     },
     {
-        id: "4",
+        _id: "4",
         nombre: "Servicios y Mantenimiento del Bajío S.A.",
         celular: "4421234567",
         domicilio: "Av. Universidad 456",
@@ -60,7 +62,7 @@ export let ClientesMockDb : Cliente[] = [
         contacto: "Laura González Ramírez"
     },
     {
-        id: "5",
+        _id: "5",
         nombre: "Autopartes y Refacciones del Pacífico",
         celular: "6641234567",
         domicilio: "Carretera Internacional 789",
@@ -77,7 +79,7 @@ export let ClientesMockDb : Cliente[] = [
 
 export const EquipoMockDb : Equipo[] = [
     {
-        id: "1",
+        _id: "1",
         marca: "HP",
         modelo: "LaserJet Pro M404dn",
         noSerie: "MXCD1234567",
@@ -86,7 +88,7 @@ export const EquipoMockDb : Equipo[] = [
         accesorios: "Cable de poder, cable USB, bandeja adicional"
     },
     {
-        id: "2",
+        _id: "2",
         marca: "Dell",
         modelo: "OptiPlex 7090",
         noSerie: "DOPT9876543",
@@ -95,7 +97,7 @@ export const EquipoMockDb : Equipo[] = [
         accesorios: "Teclado, mouse, cable VGA"
     },
     {
-        id: "3",
+        _id: "3",
         marca: "Cisco",
         modelo: "Catalyst 2960-X",
         noSerie: "FCW2145G0TL",
@@ -104,7 +106,7 @@ export const EquipoMockDb : Equipo[] = [
         accesorios: "Cable de consola, rack mount kit"
     },
     {
-        id: "4",
+        _id: "4",
         marca: "Epson",
         modelo: "EcoTank L3250",
         noSerie: "X7KY123456",
@@ -113,7 +115,7 @@ export const EquipoMockDb : Equipo[] = [
         accesorios: "Cable USB, CD de instalación, botellas de tinta vacías"
     },
     {
-        id: "5",
+        _id: "5",
         marca: "Lenovo",
         modelo: "ThinkPad X1 Carbon Gen 9",
         noSerie: "PF3A2BC1",
@@ -125,7 +127,7 @@ export const EquipoMockDb : Equipo[] = [
 
 export const OrdenServicioMockDb : OrdenServicio[] = [
     {
-        id: "1",
+        _id: "1",
         numeroOrden: "OS-2026-001",
         fechaCreacion: new Date("2026-02-20"),
         cliente: ClientesMockDb[0],
@@ -137,6 +139,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
             llegadaRefaccion: null
         },
         estado: {
+            noPedido: '',
             pendiente: "En diagnóstico",
             enviadoANombre: "",
             fechaEnvio: null,
@@ -157,13 +160,13 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         },
         historial: [
             {
-                id: "1",
+                _id: "1",
                 fecha: "2026-02-20T10:30:00",
                 accion: "Orden creada",
                 usuario: "admin"
             },
             {
-                id: "2",
+                _id: "2",
                 fecha: "2026-02-21T14:15:00",
                 accion: "Cliente autorizó presupuesto",
                 usuario: "admin"
@@ -171,7 +174,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         ]
     },
     {
-        id: "2",
+        _id: "2",
         numeroOrden: "OS-2026-002",
         fechaCreacion: new Date("2026-02-21"),
         cliente: ClientesMockDb[1],
@@ -183,6 +186,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
             llegadaRefaccion: new Date("2026-02-25")
         },
         estado: {
+            noPedido: '',
             pendiente: "Esperando refacción",
             enviadoANombre: "",
             fechaEnvio: null,
@@ -203,19 +207,19 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         },
         historial: [
             {
-                id: "1",
+                _id: "1",
                 fecha: "2026-02-21T09:00:00",
                 accion: "Orden creada",
                 usuario: "admin"
             },
             {
-                id: "2",
+                _id: "2",
                 fecha: "2026-02-21T16:30:00",
                 accion: "Diagnóstico completado - fuente dañada",
                 usuario: "técnico2"
             },
             {
-                id: "3",
+                _id: "3",
                 fecha: "2026-02-22T11:00:00",
                 accion: "Refacción ordenada",
                 usuario: "admin"
@@ -223,7 +227,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         ]
     },
     {
-        id: "3",
+        _id: "3",
         numeroOrden: "OS-2026-003",
         fechaCreacion: new Date("2026-02-22"),
         cliente: ClientesMockDb[2],
@@ -236,6 +240,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         },
         estado: {
             pendiente: "Reparado",
+            noPedido: '',
             enviadoANombre: "",
             fechaEnvio: null,
             notasEnvio: "",
@@ -255,19 +260,19 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         },
         historial: [
             {
-                id: "1",
+                _id: "1",
                 fecha: "2026-02-22T08:45:00",
                 accion: "Orden creada",
                 usuario: "admin"
             },
             {
-                id: "2",
+                _id: "2",
                 fecha: "2026-02-23T10:20:00",
                 accion: "Presupuesto autorizado",
                 usuario: "admin"
             },
             {
-                id: "3",
+                _id: "3",
                 fecha: "2026-02-25T17:00:00",
                 accion: "Reparación completada",
                 usuario: "técnico3"
@@ -275,7 +280,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         ]
     },
     {
-        id: "4",
+        _id: "4",
         numeroOrden: "OS-2026-004",
         fechaCreacion: new Date("2026-02-23"),
         cliente: ClientesMockDb[3],
@@ -288,6 +293,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         },
         estado: {
             pendiente: "Cliente no autorizó",
+            noPedido: '',
             enviadoANombre: "",
             fechaEnvio: null,
             notasEnvio: "",
@@ -307,25 +313,25 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         },
         historial: [
             {
-                id: "1",
+                _id: "1",
                 fecha: "2026-02-23T11:15:00",
                 accion: "Orden creada",
                 usuario: "admin"
             },
             {
-                id: "2",
+                _id: "2",
                 fecha: "2026-02-24T15:45:00",
                 accion: "Diagnóstico completado",
                 usuario: "técnico1"
             },
             {
-                id: "3",
+                _id: "3",
                 fecha: "2026-02-25T10:00:00",
                 accion: "Cliente informado del presupuesto",
                 usuario: "admin"
             },
             {
-                id: "4",
+                _id: "4",
                 fecha: "2026-02-26T09:30:00",
                 accion: "Cliente no autorizó reparación",
                 usuario: "admin"
@@ -333,7 +339,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         ]
     },
     {
-        id: "5",
+        _id: "5",
         numeroOrden: "OS-2026-005",
         fechaCreacion: new Date("2026-02-24"),
         cliente: ClientesMockDb[4],
@@ -346,6 +352,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         },
         estado: {
             pendiente: "En reparación",
+            noPedido: '',
             enviadoANombre: "",
             fechaEnvio: null,
             notasEnvio: "",
@@ -365,23 +372,103 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         },
         historial: [
             {
-                id: "1",
+                _id: "1",
                 fecha: "2026-02-24T13:20:00",
                 accion: "Orden creada",
                 usuario: "admin"
             },
             {
-                id: "2",
+                _id: "2",
                 fecha: "2026-02-24T14:00:00",
                 accion: "Verificado - equipo en garantía",
                 usuario: "admin"
             },
             {
-                id: "3",
+                _id: "3",
                 fecha: "2026-02-25T09:15:00",
                 accion: "Reparación iniciada",
                 usuario: "técnico2"
             }
         ]
+    }
+]
+
+export let RefaccionesMockDb: Refaccion[] = [
+    {
+        _id: "1",
+        nombre: "Cable Flex Pantalla",
+        aparato: "Laptop",
+        precio: 350,
+        costo: 180,
+        existencias: 5,
+        ubicacion: "Estante A1",
+        compra: 0
+    },
+    {
+        _id: "2",
+        nombre: "Batería 5000mAh",
+        aparato: "Smartphone",
+        precio: 600,
+        costo: 310,
+        existencias: 12,
+        ubicacion: "Estante B3",
+        compra: 0
+    },
+    {
+        _id: "3",
+        nombre: "Teclado Membrana",
+        aparato: "Laptop",
+        precio: 800,
+        costo: 420,
+        existencias: 3,
+        ubicacion: "Estante A2",
+        compra: 0
+    },
+    {
+        _id: "4",
+        nombre: "Pantalla LCD 6.5",
+        aparato: "Smartphone",
+        precio: 1200,
+        costo: 650,
+        existencias: 7,
+        ubicacion: "Estante C1",
+        compra: 0
+    },
+    {
+        _id: "5",
+        nombre: "Fuente de Poder 65W",
+        aparato: "Laptop",
+        precio: 950,
+        costo: 500,
+        existencias: 4,
+        ubicacion: "Estante B1",
+        compra: 0
+    }
+]
+
+export let TecnicosMockDb: Tecnico[] = [
+    {
+        _id: '1',
+        nombre: 'Carlos Mendoza',
+        especialidad: 'Laptops y PCs',
+        telefono: '8181111111',
+        email: 'carlos@taller.com',
+        activo: true
+    },
+    {
+        _id: '2',
+        nombre: 'Ana Rodríguez',
+        especialidad: 'Celulares y Tablets',
+        telefono: '8182222222',
+        email: 'ana@taller.com',
+        activo: true
+    },
+    {
+        _id: '3',
+        nombre: 'Luis Torres',
+        especialidad: 'Impresoras',
+        telefono: '8183333333',
+        email: 'luis@taller.com',
+        activo: false
     }
 ]

@@ -10,7 +10,7 @@ export class OrdenServicioService {
 
     constructor() {
         const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-        const endpoint = '/ordenes'
+        const endpoint = '/ordenes-servicio'
         this.api = axios.create({
             baseURL: `${baseURL}${endpoint}`,
             headers: {

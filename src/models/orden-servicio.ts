@@ -18,14 +18,32 @@ export interface EstadoEquipo {
     reparadoPor: string;
     fechaReparacion: Date | null;
     descripcionReparacion: string;
+    noPedido: string;
 }
 
 export interface HistorialItem {
-    id?: string;
+    _id?: string;
     fecha: string;
     accion: string;
     usuario: string;
 }
+
+export interface RefaccionItem {
+    codigo: number
+    nombre: string
+    aparato: string
+    cantidad: number | null
+    precio: number | null
+    costo: number | null
+    existencia: number | null
+    ubicacion: string
+    compraCosto: number | null
+    fechaPresupuesto: Date | null
+    catalogId: string | null   // null = fila nueva sin guardar en catálogo; truthy = guardada
+    guardandoEnCatalogo: boolean
+}
+
+
 
 export interface Financiero {
     presupuesto: number;
@@ -56,7 +74,7 @@ export type TipoCargo =
     | 'GarantiaVendor';
 
 export interface OrdenServicio {
-    id?: string;
+    _id?: string;
     numeroOrden: string;
     fechaCreacion: Date;
     cliente?: Cliente;
@@ -68,6 +86,7 @@ export interface OrdenServicio {
     tipoCargo: TipoCargo;
     financiero: Financiero;
     historial: HistorialItem[];
+    refacciones?: RefaccionItem[];
 }
 
 // DTOs para API
@@ -75,6 +94,7 @@ export interface CrearOrdenServicioDTO {
     cliente?: Cliente;
     equipo?: Equipo;
     fechas: Fechas;
+    refacciones?: RefaccionItem[];
 }
 
 export interface ActualizarOrdenServicioDTO extends Partial<OrdenServicio> {

@@ -1,5 +1,5 @@
 export interface Cliente {
-    id?: string;
+    _id?: string;
     folio?: string;
     nombre: string;
     celular: string;

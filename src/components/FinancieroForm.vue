@@ -10,11 +10,11 @@
             <div class="financial-grid">
                 <div class="financial-row">
                     <label>Presupuesto</label>
-                    <InputNumber :modelValue="financiero.presupuesto" @update:modelValue="updateField('presupuesto', $event)" mode="currency" currency="USD" locale="en-US" />
+                    <span class="computed-value">{{ formatCurrency(financiero.presupuesto) }}</span>
                 </div>
                 <div class="financial-row">
                     <label>Revisión</label>
-                    <InputNumber :modelValue="financiero.revision" @update:modelValue="updateField('revision', $event)" mode="currency" currency="USD" locale="en-US" />
+                    <span class="computed-value">{{ formatCurrency(financiero.revision) }}</span>
                 </div>
                 <div class="financial-row">
                     <label>Anticipo</label>
@@ -26,7 +26,7 @@
                 </div>
                 <div class="financial-row">
                     <label>IVA</label>
-                    <InputNumber :modelValue="financiero.iva" @update:modelValue="updateField('iva', $event)" mode="currency" currency="USD" locale="en-US" />
+                    <span class="computed-value">{{ formatCurrency(financiero.iva) }}</span>
                 </div>
                 <Divider />
                 <div class="financial-row total">
@@ -59,6 +59,9 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const { calcularSubtotal } = useOrdenServicio()
+
+const formatCurrency = (value: number): string =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
 
 const updateField = (field: keyof Financiero, value: number | null) => {
     emit('update:financiero', { ...props.financiero, [field]: value ?? 0 })
@@ -128,6 +131,14 @@ const updateField = (field: keyof Financiero, value: number | null) => {
     font-size: var(--card-title-font-size);
     font-weight: 700;
     color: #1e293b;
+}
+
+.computed-value {
+    font-size: var(--card-title-font-size);
+    font-weight: 500;
+    color: #1e293b;
+    min-width: 115px;
+    text-align: right;
 }
 
 :deep(.p-divider) {

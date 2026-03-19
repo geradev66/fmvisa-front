@@ -16,30 +16,65 @@
                     <TabPanel value="0">
                         <div class="form-grid">
                             <div class="form-row">
+                                <div class="form-field equipo-busqueda-wrapper" style="position: relative; grid-column: 1 / -1;" ref="busquedaWrapperRef">
+                                    <FloatLabel variant="on">
+                                        <InputText
+                                            id="buscar-equipo"
+                                            :modelValue="busquedaEquipo"
+                                            @update:modelValue="onBusquedaEquipoChange"
+                                            @keydown="onBusquedaKeydown"
+                                            placeholder="Buscar por tipo, marca, modelo o serie..."
+                                            autocomplete="off"
+                                        />
+                                        <label for="buscar-equipo">Buscar equipo existente</label>
+                                    </FloatLabel>
+                                    <Transition name="dropdown">
+                                        <div v-if="equiposSugeridos.length > 0 && mostrarSugerenciasEquipo" class="equipos-options">
+                                            <div class="equipos-found">
+                                                <i class="pi pi-desktop"></i>
+                                                <span>Equipos encontrados ({{ equiposSugeridos.length }})</span>
+                                            </div>
+                                            <ul ref="listaEquiposRef">
+                                                <li
+                                                    v-for="(item, idx) in equiposSugeridos"
+                                                    :key="item._id"
+                                                    :class="{ 'equipo-activo': idx === indiceSugerencia }"
+                                                    @click="seleccionarEquipo(item)"
+                                                    @mouseenter="indiceSugerencia = idx"
+                                                >
+                                                    <span class="equipo-nombre">{{ item.marca }} {{ item.modelo }}</span>
+                                                    <span class="equipo-serie">S/N: {{ item.tipo }}</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </Transition>
+                                </div>
+                            </div>
+                            <div class="form-row">
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <InputText size="large" id="marca" :modelValue="equipo.marca"
+                                        <InputText size="small" id="marca" :modelValue="equipo.marca"
                                             @update:modelValue="updateEquipo('marca', $event)" />
                                         <label for="marca">Tipo</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <InputText size="large" id="modelo" :modelValue="equipo.modelo"
+                                        <InputText size="small" id="modelo" :modelValue="equipo.modelo"
                                             @update:modelValue="updateEquipo('modelo', $event)" />
                                         <label for="modelo">Marca</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <InputText size="large" id="noSerie" :modelValue="equipo.noSerie"
+                                        <InputText size="small" id="noSerie" :modelValue="equipo.noSerie"
                                             @update:modelValue="updateEquipo('noSerie', $event)" />
                                         <label for="noSerie">Modelo</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <InputText size="large" id="tipo" :modelValue="equipo.tipo"
+                                        <InputText size="small" id="tipo" :modelValue="equipo.tipo"
                                             @update:modelValue="updateEquipo('tipo', $event)" />
                                         <label for="tipo">Serie</label>
                                     </FloatLabel>
@@ -48,14 +83,14 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <Textarea size="large" id="falla" :modelValue="equipo.falla"
+                                        <Textarea size="small" id="falla" :modelValue="equipo.falla"
                                             @update:modelValue="updateEquipo('falla', $event)" rows="2" auto-resize />
                                         <label for="falla">Falla Reportada</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <Textarea size="large" id="accesorios" :modelValue="equipo.accesorios"
+                                        <Textarea size="small" id="accesorios" :modelValue="equipo.accesorios"
                                             @update:modelValue="updateEquipo('accesorios', $event)" rows="2"
                                             auto-resize />
                                         <label for="accesorios">Accesorios</label>
@@ -65,7 +100,7 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <Textarea size="large" id="observaciones" :modelValue="equipo.observaciones"
+                                        <Textarea size="small" id="observaciones" :modelValue="equipo.observaciones"
                                             @update:modelValue="updateEquipo('observaciones', $event)" rows="2"
                                             auto-resize />
                                         <label for="observaciones">Diagnóstico</label>
@@ -73,7 +108,7 @@
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <Textarea size="large" id="diagnostico" :modelValue="equipo.diagnostico"
+                                        <Textarea size="small" id="diagnostico" :modelValue="equipo.diagnostico"
                                             @update:modelValue="updateEquipo('diagnostico', $event)" rows="2"
                                             auto-resize />
                                         <label for="diagnostico">Observaciones</label>
@@ -83,14 +118,14 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <Textarea size="large" id="pendiente" :modelValue="equipo.pendiente"
+                                        <Textarea size="small" id="pendiente" :modelValue="equipo.pendiente"
                                             @update:modelValue="updateEquipo('pendiente', $event)" rows="2"
                                             auto-resize />
                                         <label for="pendiente">Pendiente</label>
                                     </FloatLabel>
                                 </div>
                                     <div class="radio-section">
-                                        <h4 class="section-subtitle"> Forma de Pago</h4>
+                                        <span class="section-subtitle"> Forma de Pago</span>
                                         <div class="radio-grid">
                                             <div class="radio-option">
                                                 <RadioButton :modelValue="equipo.formaPago" @update:modelValue="updateEquipo('formaPago', $event)" inputId="efectivo" value="Efectivo" />
@@ -163,7 +198,7 @@
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <InputText size="large" id="noPedido" v-model="noPedidoLocal" />
+                                        <InputText size="large" id="noPedido" v-model="estado.noPedido" />
                                         <label for="noPedido">No. Pedido</label>
                                     </FloatLabel>
                                 </div>
@@ -206,11 +241,25 @@
                         <div class="form-grid">
                             <div class="form-row">
                                 <div class="form-field">
-                                    <FloatLabel variant="on">
-                                        <InputText size="large" id="reparadoPor" :modelValue="estado.reparadoPor"
-                                            @update:modelValue="updateEstado('reparadoPor', $event)" />
-                                        <label for="reparadoPor">Reparado Por</label>
-                                    </FloatLabel>
+                                        <label for="Reparado por"></label>
+                                        <div class="tecnico-select-row">
+                                            <Select
+                                                :modelValue="estado.reparadoPor"
+                                                @update:modelValue="updateEstado('reparadoPor', $event)"
+                                                :options="tecnicosNombres"
+                                                :loading="cargandoTecnicos"
+                                                filter
+                                                placeholder="Seleccionar técnico..."
+                                                class="tecnico-select"
+                                            />
+                                            <Button
+                                                icon="pi pi-plus"
+                                                severity="secondary"
+                                                size="small"
+                                                @click="abrirDialogoTecnico"
+                                                v-tooltip="'Nuevo técnico'"
+                                            />
+                                        </div>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
@@ -245,16 +294,48 @@
             </Tabs>
         </template>
     </Card>
+
+    <!-- Diálogo: Nuevo Técnico -->
+    <Dialog v-model:visible="dialogoTecnicoVisible" header="Nuevo Técnico" :modal="true" :style="{ width: '420px' }">
+        <div class="dialogo-tecnico">
+            <div class="campo">
+                <label>Nombre <span class="req">*</span></label>
+                <InputText v-model="nuevoTecnico.nombre" class="w-full" placeholder="Nombre completo" />
+                <p v-if="errorTecnico" class="error-msg">{{ errorTecnico }}</p>
+            </div>
+            <div class="campos-dobles">
+                <div class="campo">
+                    <label>Especialidad</label>
+                    <InputText v-model="nuevoTecnico.especialidad" class="w-full" />
+                </div>
+                <div class="campo">
+                    <label>Teléfono</label>
+                    <InputText v-model="nuevoTecnico.telefono" class="w-full" />
+                </div>
+            </div>
+            <div class="campo">
+                <label>Email</label>
+                <InputText v-model="nuevoTecnico.email" class="w-full" type="email" />
+            </div>
+        </div>
+        <template #footer>
+            <Button label="Cancelar" severity="secondary" @click="dialogoTecnicoVisible = false" :disabled="guardandoTecnico" />
+            <Button label="Guardar" icon="pi pi-check" @click="guardarNuevoTecnico" :loading="guardandoTecnico" />
+        </template>
+    </Dialog>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import FloatLabel from 'primevue/floatlabel'
 import Textarea from 'primevue/textarea'
 import DatePicker from 'primevue/datepicker'
 import RadioButton from 'primevue/radiobutton'
+import Select from 'primevue/select'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
 import Tab from 'primevue/tab'
@@ -264,6 +345,9 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import type { Equipo } from '../models/equipo'
 import type { Fechas, EstadoEquipo, HistorialItem } from '../models/orden-servicio'
+import type { TecnicoCreate } from '../models/tecnico'
+import { useTecnicoService } from '../composables/useTecnicoService'
+import { useEquipoService } from '../composables/useEquipoService'
 
 interface Props {
     equipo: Equipo
@@ -281,9 +365,135 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+// ── Búsqueda de equipo existente ──
+const equipoService = useEquipoService()
+const todosLosEquipos = ref<Equipo[]>([])
+const busquedaEquipo = ref('')
+const mostrarSugerenciasEquipo = ref(false)
+const indiceSugerencia = ref(-1)
+const busquedaWrapperRef = ref<HTMLElement | null>(null)
+const listaEquiposRef = ref<HTMLElement | null>(null)
 
-// Local-only state
-const noPedidoLocal = ref<string>('')
+const cerrarSugerencias = () => {
+    mostrarSugerenciasEquipo.value = false
+    indiceSugerencia.value = -1
+}
+
+const onClickOutside = (e: MouseEvent) => {
+    if (busquedaWrapperRef.value && !busquedaWrapperRef.value.contains(e.target as Node)) {
+        cerrarSugerencias()
+    }
+}
+
+const onBusquedaKeydown = (e: KeyboardEvent) => {
+    const total = equiposSugeridos.value.length
+    if (!mostrarSugerenciasEquipo.value || total === 0) return
+    if (e.key === 'ArrowDown' || e.key === 'Tab') {
+        e.preventDefault()
+        indiceSugerencia.value = (indiceSugerencia.value + 1) % total
+        scrollSugerenciaVisible()
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        indiceSugerencia.value = (indiceSugerencia.value - 1 + total) % total
+        scrollSugerenciaVisible()
+    } else if (e.key === 'Enter') {
+        e.preventDefault()
+        if (indiceSugerencia.value >= 0) {
+            seleccionarEquipo(equiposSugeridos.value[indiceSugerencia.value])
+        }
+    } else if (e.key === 'Escape') {
+        cerrarSugerencias()
+    }
+}
+
+const scrollSugerenciaVisible = () => {
+    if (!listaEquiposRef.value) return
+    const items = listaEquiposRef.value.querySelectorAll('li')
+    items[indiceSugerencia.value]?.scrollIntoView({ block: 'nearest' })
+}
+
+onMounted(async () => {
+    try {
+        const res = await equipoService.obtenerEquipos({ limit: 1000 })
+        todosLosEquipos.value = res.data
+    } catch (e) {
+        console.error('Error cargando equipos', e)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+})
+
+onUnmounted(() => {
+    document.removeEventListener('mousedown', onClickOutside)
+})
+
+const equiposSugeridos = computed(() => {
+    const q = busquedaEquipo.value.trim().toLowerCase()
+    if (!q) return []
+    return todosLosEquipos.value.filter(e =>
+        e.marca?.toLowerCase().includes(q) ||
+        e.modelo?.toLowerCase().includes(q) ||
+        e.noSerie?.toLowerCase().includes(q) ||
+        e.tipo?.toLowerCase().includes(q)
+    ).slice(0, 8)
+})
+
+const onBusquedaEquipoChange = (val: string | undefined) => {
+    busquedaEquipo.value = val || ''
+    indiceSugerencia.value = -1
+    mostrarSugerenciasEquipo.value = true
+}
+
+const seleccionarEquipo = (equipo: Equipo) => {
+    emit('update:equipo', { ...equipo })
+    busquedaEquipo.value = `${equipo.marca} ${equipo.modelo} - S/N: ${equipo.tipo}`
+    cerrarSugerencias()
+}
+const tecnicoService = useTecnicoService()
+const tecnicosNombres = ref<string[]>([])
+const cargandoTecnicos = ref(false)
+
+onMounted(async () => {
+    cargandoTecnicos.value = true
+    try {
+        const res = await tecnicoService.obtenerTecnicos({ activo: true, limit: 1000 })
+        tecnicosNombres.value = res.data.map(t => t.nombre)
+    } catch (e) {
+        console.error('Error cargando técnicos', e)
+    } finally {
+        cargandoTecnicos.value = false
+    }
+})
+
+// ── Diálogo nuevo técnico ──
+const dialogoTecnicoVisible = ref(false)
+const guardandoTecnico = ref(false)
+const errorTecnico = ref('')
+const nuevoTecnico = ref<TecnicoCreate>({ nombre: '', especialidad: '', telefono: '', email: '' })
+
+const abrirDialogoTecnico = () => {
+    nuevoTecnico.value = { nombre: '', especialidad: '', telefono: '', email: '' }
+    errorTecnico.value = ''
+    dialogoTecnicoVisible.value = true
+}
+
+const guardarNuevoTecnico = async () => {
+    if (!nuevoTecnico.value.nombre.trim()) {
+        errorTecnico.value = 'El nombre es obligatorio.'
+        return
+    }
+    errorTecnico.value = ''
+    guardandoTecnico.value = true
+    try {
+        const creado = await tecnicoService.crearTecnico(nuevoTecnico.value)
+        tecnicosNombres.value.push(creado.nombre)
+        updateEstado('reparadoPor', creado.nombre)
+        dialogoTecnicoVisible.value = false
+    } catch (e) {
+        errorTecnico.value = 'Error al guardar el técnico.'
+    } finally {
+        guardandoTecnico.value = false
+    }
+}
 
 // Update helpers — emit immutable copies upward
 const updateEquipo = (field: keyof Equipo, value: any) => {
@@ -384,6 +594,15 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
 }
 
 
+.section-subtitle {
+    font-size: .9rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
 
 /* =============================================
    TABS
@@ -402,4 +621,139 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
     color: var(--tab-icon-color);
 }
 
+.tecnico-select-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+}
+
+.tecnico-select {
+    flex: 1;
+}
+
+/* Búsqueda equipo */
+.equipos-options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: 220px;
+        overflow-y: auto;
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.15s ease;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            &:hover {
+                background: #f0f9ff;
+            }
+
+            &.equipo-activo {
+                background: #dbeafe;
+            }
+        }
+    }
+}
+
+.equipos-found {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.5rem 0.75rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+
+    i {
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+}
+
+.equipo-nombre {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.equipo-serie {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Dropdown transition */
+.dropdown-enter-active,
+.dropdown-leave-active {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+/* Diálogo técnico */
+.dialogo-tecnico {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.campo label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.campos-dobles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.req {
+    color: #ef4444;
+}
+
+.error-msg {
+    color: #ef4444;
+    font-size: 12px;
+    margin: 0;
+}
 </style>

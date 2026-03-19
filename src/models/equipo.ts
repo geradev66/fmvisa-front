@@ -1,5 +1,5 @@
 export interface Equipo {
-    id?: string;
+    _id?: string;
     marca: string;
     modelo: string;
     noSerie: string;

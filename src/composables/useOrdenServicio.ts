@@ -3,12 +3,9 @@
 import type { Financiero } from "../models/orden-servicio"
 
 export function useOrdenServicio() {
+    // Total = presupuesto + revision + iva (anticipo y pagos pendientes de implementar)
     const calcularSubtotal = (financiero: Financiero): number => {
-        return financiero.presupuesto + 
-               financiero.revision + 
-               financiero.anticipo + 
-               financiero.pagos + 
-               financiero.iva
+        return financiero.presupuesto + financiero.revision + financiero.iva
     }
 
     const calcularTotal = (financiero: Financiero): number => {
