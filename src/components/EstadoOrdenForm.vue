@@ -50,7 +50,9 @@
                     </div>
                     <div class="radio-option">
                         <RadioButton :modelValue="referencias" @update:modelValue="emit('update:referencias', $event)" inputId="reparado" value="Reparado" />
-                        <label for="reparado">Reparado</label>
+                        <label for="reparado" class="label-destacado">Reparado</label>
+                    </div>
+                    <div class="radio-option">
                     </div>
                     <div class="radio-option">
                         <RadioButton :modelValue="referencias" @update:modelValue="emit('update:referencias', $event)" inputId="ningunRef" value="Ninguno" />
@@ -170,6 +172,12 @@ const getEstadoSeverity = (): string => {
     color: #475569;
     cursor: pointer;
     line-height: 1.2;
+}
+
+.label-destacado {
+    font-size: 1.05rem !important;
+    font-weight: 700;
+    color: #0f172a;
 }
 
 

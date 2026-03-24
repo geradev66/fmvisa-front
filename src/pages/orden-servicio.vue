@@ -12,7 +12,7 @@
                 </div>
                 
             </div>
-            <Badge value="Entregado" size="xlarge" severity="success" class="Badge-entrega"></Badge>
+            <Badge :value="estadoBadgeValue" size="xlarge" :severity="estadoBadgeSeverity" class="Badge-entrega"></Badge>
             <div class="order-date">
                 <span class="date-label">Fecha</span>
                 <span class="date-value">{{ formatDate(fechas.ingreso) }}</span>
@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watchEffect, watch } from 'vue'
+import { ref, onMounted, watchEffect, watch, computed } from 'vue'
 import Button from 'primevue/button'
 import { Badge } from 'primevue'
 import type { 
@@ -177,6 +177,35 @@ const estadoOrden = ref<EstadoOrden>('Refacción')
 const referencias = ref<ReferenciaTipo>('Garantia')
 const tipoCargo = ref<TipoCargo>('CargoRegular')
 
+const estadoBadgeValue = computed(() => {
+    if (estadoOrden.value === 'Entregar') {
+        const fechaSalida = fechas.value.salida ? formatDate(fechas.value.salida) : formatDate(new Date())
+        return `Entregado - ${fechaSalida}`
+    }
+
+    const labelMap: Record<EstadoOrden, string> = {
+        'Pendiente': 'Pendiente',
+        'Autoriza': 'Autorizar',
+        'Informa': 'Información',
+        'Refacción': 'Refacción',
+        'Entregar': 'Entregado',
+        'Ninguno': 'Ninguno'
+    }
+    return labelMap[estadoOrden.value] || 'Pendiente'
+})
+
+const estadoBadgeSeverity = computed(() => {
+    const severityMap: Record<EstadoOrden, 'success' | 'warn' | 'info' | 'danger' | 'secondary' | 'contrast'> = {
+        'Pendiente': 'warn',
+        'Autoriza': 'success',
+        'Informa': 'info',
+        'Refacción': 'contrast',
+        'Entregar': 'success',
+        'Ninguno': 'secondary'
+    }
+    return severityMap[estadoOrden.value] || 'secondary'
+})
+
 const financiero = ref<Financiero>({
     presupuesto: 0.00,
     revision: 0.00,
@@ -265,6 +294,12 @@ watch(
     guardarEnCache,
     { deep: true }
 )
+
+watch(estadoOrden, (nuevoEstado) => {
+    if (nuevoEstado === 'Entregar' && !fechas.value.salida) {
+        fechas.value.salida = new Date()
+    }
+})
 
 // Actualizar campos financieros calculables cuando cambien las refacciones
 watchEffect(() => {
@@ -764,6 +799,9 @@ onMounted(() => {
 
 .Badge-entrega{
     margin-left: 1rem;
+    font-size: 1.5rem;
+    padding: 1.5rem 1.9rem !important;
+    font-weight: 700;
 }
 
 </style>
