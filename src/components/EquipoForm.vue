@@ -128,17 +128,32 @@
                                         <span class="section-subtitle"> Forma de Pago</span>
                                         <div class="radio-grid">
                                             <div class="radio-option">
-                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="updateEquipo('formaPago', $event)" inputId="efectivo" value="Efectivo" />
+                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="onFormaPagoChange" inputId="efectivo" value="Efectivo" />
                                                 <label for="efectivo">Efectivo</label>
                                             </div>
                                             <div class="radio-option">
-                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="updateEquipo('formaPago', $event)" inputId="tarjeta" value="Tarjeta" />
+                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="onFormaPagoChange" inputId="tarjeta" value="Tarjeta" />
                                                 <label for="tarjeta">Tarjeta</label>
                                             </div>
                                             <div class="radio-option">
-                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="updateEquipo('formaPago', $event)" inputId="transferencia" value="Transferencia" />
+                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="onFormaPagoChange" inputId="transferencia" value="Transferencia" />
                                                 <label for="transferencia">Transferencia</label>
                                             </div>
+                                            <div class="radio-option">
+                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="onFormaPagoChange" inputId="otro" value="Otro" />
+                                                <label for="otro">Otro</label>
+                                            </div>
+                                        </div>
+                                        <div v-if="equipo.formaPago === 'Otro'" class="otro-pago-field">
+                                            <FloatLabel variant="on">
+                                                <InputText
+                                                    size="small"
+                                                    id="formaPagoEspecifique"
+                                                    :modelValue="equipo.formaPagoEspecifique"
+                                                    @update:modelValue="updateEquipo('formaPagoEspecifique', $event)"
+                                                />
+                                                <label for="formaPagoEspecifique">Especifique</label>
+                                            </FloatLabel>
                                         </div>
                                     </div>
                             </div>
@@ -500,6 +515,14 @@ const updateEquipo = (field: keyof Equipo, value: any) => {
     emit('update:equipo', { ...props.equipo, [field]: value })
 }
 
+const onFormaPagoChange = (value: string) => {
+    const nextEquipo: Equipo = { ...props.equipo, formaPago: value }
+    if (value !== 'Otro') {
+        nextEquipo.formaPagoEspecifique = ''
+    }
+    emit('update:equipo', nextEquipo)
+}
+
 const updateFechas = (field: keyof Fechas, value: any) => {
     emit('update:fechas', { ...props.fechas, [field]: value })
 }
@@ -533,6 +556,11 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
     display: flex;
     align-items: center;
     gap: 0.25rem;
+}
+
+.otro-pago-field {
+    margin-top: 0.75rem;
+    max-width: 240px;
 }
 
 .card-title {

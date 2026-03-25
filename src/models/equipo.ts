@@ -10,6 +10,7 @@ export interface Equipo {
     observaciones?: string;
     pendiente?: string;
     formaPago?: string;
+    formaPagoEspecifique?: string;
 }
 
 export interface CrearEquipoDTO {
