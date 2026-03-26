@@ -189,7 +189,7 @@ const onNombreKeydown = (e: KeyboardEvent) => {
     } else if (e.key === 'Enter') {
         e.preventDefault()
         if (indiceSugerencia.value >= 0) {
-            selectCliente(filteredClientes.value[indiceSugerencia.value])
+            selectCliente(filteredClientes.value[indiceSugerencia.value] as any)
         }
     } else if (e.key === 'Escape') {
         cerrarSugerencias()

@@ -169,7 +169,7 @@
                                     <FloatLabel variant="on">
                                         <label class="field-label">Fecha de Presupuesto</label>
                                         <DatePicker size="large" :modelValue="fechas.presupuesto"
-                                            @update:modelValue="updateFechas('presupuesto', $event)" dateFormat="mm/dd/yy"
+                                            @update:modelValue="updateFechas('presupuesto', $event)" 
                                             showIcon />
                                     </FloatLabel>
                                 </div>
@@ -178,7 +178,7 @@
                                     <FloatLabel variant="on">
                                         <label class="field-label">Fecha de Salida</label>
                                         <DatePicker size="large" :modelValue="fechas.salida"
-                                            @update:modelValue="updateFechas('salida', $event)" dateFormat="mm/dd/yy"
+                                            @update:modelValue="updateFechas('salida', $event)" 
                                             showIcon />
                                     </FloatLabel>
                                 </div>
@@ -189,7 +189,7 @@
                                         <label class="field-label">Fecha de Autorización</label>
                                         <DatePicker size="large" :modelValue="fechas.autorizacion"
                                             @update:modelValue="updateFechas('autorizacion', $event)"
-                                            dateFormat="mm/dd/yy" showIcon />
+                                            showIcon />
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
@@ -197,7 +197,7 @@
                                         <label class="field-label">Pedido Refacción</label>
                                         <DatePicker size="large" :modelValue="fechas.pedidoRefaccion"
                                             @update:modelValue="updateFechas('pedidoRefaccion', $event)"
-                                            dateFormat="mm/dd/yy" showIcon />
+                                            showIcon />
                                     </FloatLabel>
                                 </div>
                             </div>
@@ -208,7 +208,7 @@
                                         <label class="field-label">Llegada Refacción</label>
                                         <DatePicker size="large" :modelValue="fechas.llegadaRefaccion"
                                             @update:modelValue="updateFechas('llegadaRefaccion', $event)"
-                                            dateFormat="mm/dd/yy" showIcon />
+                                            showIcon />
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
@@ -236,7 +236,7 @@
                                         <label class="field-label">Fecha Envío</label>
                                         <DatePicker size="large" :modelValue="estado.fechaEnvio"
                                             @update:modelValue="updateEstado('fechaEnvio', $event)"
-                                            dateFormat="mm/dd/yy" showIcon />
+                                            showIcon />
                                     </FloatLabel>
                                 </div>
                             </div>
@@ -281,7 +281,7 @@
                                         <label class="field-label">Fecha Reparación</label>
                                         <DatePicker size="large" :modelValue="estado.fechaReparacion"
                                             @update:modelValue="updateEstado('fechaReparacion', $event)"
-                                            dateFormat="mm/dd/yy" showIcon />
+                                            showIcon />
                                     </FloatLabel>
                                 </div>
                             </div>
@@ -414,7 +414,7 @@ const onBusquedaKeydown = (e: KeyboardEvent) => {
     } else if (e.key === 'Enter') {
         e.preventDefault()
         if (indiceSugerencia.value >= 0) {
-            seleccionarEquipo(equiposSugeridos.value[indiceSugerencia.value])
+            seleccionarEquipo(equiposSugeridos.value[indiceSugerencia.value] as any)
         }
     } else if (e.key === 'Escape') {
         cerrarSugerencias()
