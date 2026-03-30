@@ -25,7 +25,23 @@
                     <InputNumber :modelValue="financiero.pagos" @update:modelValue="updateField('pagos', $event)" mode="currency" currency="USD" locale="en-US" />
                 </div>
                 <div class="financial-row">
+                    <label>Resto</label>
+                    <span class="computed-value">{{ formatCurrency(financiero.iva) }}</span>
+                </div>
+                <div class="financial-row">
                     <label>IVA</label>
+                    <span class="computed-value">{{ formatCurrency(financiero.iva) }}</span>
+                </div>
+                <div class="financial-row">
+                    <label>Pago con tarjeta</label>
+                    <span class="computed-value">{{ formatCurrency(financiero.iva) }}</span>
+                </div>
+                <div class="financial-row">
+                    <label>Redondeo</label>
+                    <span class="computed-value">{{ formatCurrency(financiero.iva) }}</span>
+                </div>
+                 <div class="financial-row">
+                    <label>Pago actual</label>
                     <span class="computed-value">{{ formatCurrency(financiero.iva) }}</span>
                 </div>
                 <Divider />

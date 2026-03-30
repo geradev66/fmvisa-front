@@ -13,12 +13,18 @@
                 
             </div>
             <Badge :value="estadoBadgeValue" size="xlarge" :severity="estadoBadgeSeverity" class="Badge-entrega"></Badge>
-            <div class="order-date">
-                <span class="date-label">Fecha</span>
-                <span class="date-value">{{ formatDate(fechas.ingreso) }}</span>
+            <div class="status" :style="{ backgroundColor: statusColor }">{{ statusLabel }}</div>
+            <div class="gsfl-wrapper">
+                <label for="gsfl-input" class="gsfl-label">GSFL</label>
+                <input id="gsfl-input" type="text" class="gsfl-input" />
             </div>
             <div class="action-buttons">
+                 <div class="order-date-inline">
+                    <span class="date-label">Fecha</span>
+                    <span class="date-value">{{ formatDate(fechas.ingreso) }}</span>
+                </div>
                 <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" size="large" @click="crearNuevaOrden"></Button>
+               
                 <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined size="large" @click="guardarOrden" :loading="loading"></Button>
                 <Button label="Ticket" icon="pi pi-print" severity="secondary" outlined size="large" @click="imprimirTicket" :disabled="!ordenId"></Button>
                 <Button label="Imprimir" icon="pi pi-file" severity="secondary" outlined size="large" @click="imprimirOrdenCompleta" :disabled="!ordenId"></Button>
@@ -204,6 +210,28 @@ const estadoBadgeSeverity = computed(() => {
         'Ninguno': 'secondary'
     }
     return severityMap[estadoOrden.value] || 'secondary'
+})
+
+const statusLabel = computed(() => {
+    const labelMap: Record<string, string> = {
+        'Garantia': 'Gtia. Reparación',
+        'SinReparacion': 'Sin Reparación',
+        'NoAutorizo': 'No Autorizó',
+        'Reparado': 'Reparado',
+        'Ninguno': 'Ninguno'
+    }
+    return labelMap[referencias.value] || 'Ninguno'
+})
+
+const statusColor = computed(() => {
+    const colorMap: Record<string, string> = {
+        'Garantia': '#22c55e',
+        'SinReparacion': '#f59e0b',
+        'NoAutorizo': '#ef4444',
+        'Reparado': '#3b82f6',
+        'Ninguno': '#94a3b8'
+    }
+    return colorMap[referencias.value] || '#94a3b8'
 })
 
 const financiero = ref<Financiero>({
@@ -615,13 +643,21 @@ onMounted(() => {
     line-height: 1;
 }
 
+.order-date-inline {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    line-height: 1;
+    padding: 0 0.3rem;
+}
+
 .date-label {
-    font-size: 11px;
+    font-size: 16px;
     color: #64748b;
 }
 
 .date-value {
-    font-size: 13px;
+    font-size: 20px;
     font-weight: 600;
     color: #1e293b;
 }
@@ -804,4 +840,59 @@ onMounted(() => {
     font-weight: 700;
 }
 
+.status {
+    font-size: 3em;
+    color:white;
+    background-color: #00f018;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+
+}   
+
+.gsfl-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+}
+
+.gsfl-label {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background-color: #3b82f6;
+    padding: 5px;
+}
+
+.gsfl-input {
+    width: 100%;
+    height: 35px;
+    padding: 0 0.4rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    transition: border-color 0.2s;
+}
+
+.gsfl-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+
+/* hide number spinners */
+.gsfl-input::-webkit-outer-spin-button,
+.gsfl-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.gsfl-input[type=number] {
+    -moz-appearance: textfield;
+}
 </style>
