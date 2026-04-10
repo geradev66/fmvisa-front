@@ -297,11 +297,62 @@ type RefaccionPartida = RefaccionItem
 const refaccionService = useRefaccionService()
 
 // ── Estado de la tabla ──
-const refacciones = ref<RefaccionItem[]>([...props.modelValue])
+const createDefaultRefacciones = (): RefaccionItem[] => ([
+    {
+        codigo: 1,
+        nombre: 'REVISION',
+        aparato: 'REVISION',
+        cantidad: 1,
+        precio: null,
+        costo: null,
+        existencia: null,
+        ubicacion: '',
+        compraCosto: null,
+        fechaPresupuesto: null,
+        catalogId: null,
+        guardandoEnCatalogo: false
+    },
+    {
+        codigo: 2,
+        nombre: 'ANTICIPO',
+        aparato: 'ANTICIPO',
+        cantidad: 1,
+        precio: null,
+        costo: null,
+        existencia: null,
+        ubicacion: '',
+        compraCosto: null,
+        fechaPresupuesto: null,
+        catalogId: null,
+        guardandoEnCatalogo: false
+    },
+    {
+        codigo: 3,
+        nombre: 'MANO DE OBRA',
+        aparato: 'MANO DE OBRA',
+        cantidad: 1,
+        precio: null,
+        costo: null,
+        existencia: null,
+        ubicacion: '',
+        compraCosto: null,
+        fechaPresupuesto: null,
+        catalogId: null,
+        guardandoEnCatalogo: false
+    }
+])
+
+const refacciones = ref<RefaccionItem[]>(props.modelValue && props.modelValue.length > 0 ? [...props.modelValue] : createDefaultRefacciones())
 const refaccionSeleccionada = ref<RefaccionItem | null>(null)
 
 // Sincronizar cuando el padre reemplaza el array (ej. nueva orden o restaurar borrador)
-watch(() => props.modelValue, (val) => { refacciones.value = val })
+watch(() => props.modelValue, (val) => { 
+    if (!val || val.length === 0) {
+        refacciones.value = createDefaultRefacciones()
+    } else {
+        refacciones.value = val
+    }
+})
 // Emitir hacia el padre en cada cambio interno
 watch(refacciones, (val) => emit('update:modelValue', val), { deep: true })
 

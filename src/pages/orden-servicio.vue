@@ -13,18 +13,19 @@
                 
             </div>
             <Badge :value="estadoBadgeValue" size="xlarge" :severity="estadoBadgeSeverity" class="Badge-entrega"></Badge>
-            <div class="status" :style="{ backgroundColor: statusColor }">{{ statusLabel }}</div>
-            <div class="gsfl-wrapper">
-                <label for="gsfl-input" class="gsfl-label">GSFL</label>
-                <input id="gsfl-input" type="text" class="gsfl-input" />
+            <Badge :value="referenciaBadgeValue" size="xlarge" :severity="referenciaBadgeSeverity" class="Badge-entrega"></Badge>
+            <div class="gsflSection">
+                <div class="gsfl">
+                    GSFL
+                </div>
+                <input type="text">
             </div>
             <div class="action-buttons">
-                 <div class="order-date-inline">
+                <div class="order-date">
                     <span class="date-label">Fecha</span>
                     <span class="date-value">{{ formatDate(fechas.ingreso) }}</span>
                 </div>
                 <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" size="large" @click="crearNuevaOrden"></Button>
-               
                 <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined size="large" @click="guardarOrden" :loading="loading"></Button>
                 <Button label="Ticket" icon="pi pi-print" severity="secondary" outlined size="large" @click="imprimirTicket" :disabled="!ordenId"></Button>
                 <Button label="Imprimir" icon="pi pi-file" severity="secondary" outlined size="large" @click="imprimirOrdenCompleta" :disabled="!ordenId"></Button>
@@ -212,26 +213,26 @@ const estadoBadgeSeverity = computed(() => {
     return severityMap[estadoOrden.value] || 'secondary'
 })
 
-const statusLabel = computed(() => {
-    const labelMap: Record<string, string> = {
-        'Garantia': 'Gtia. Reparación',
-        'SinReparacion': 'Sin Reparación',
-        'NoAutorizo': 'No Autorizó',
+const referenciaBadgeValue = computed(() => {
+    const labelMap: Record<ReferenciaTipo, string> = {
+        'Garantia': 'Gtia. reparacion',
+        'SinReparacion': 'Sin reparacion',
+        'NoAutorizo': 'No autorizo',
         'Reparado': 'Reparado',
         'Ninguno': 'Ninguno'
     }
     return labelMap[referencias.value] || 'Ninguno'
 })
 
-const statusColor = computed(() => {
-    const colorMap: Record<string, string> = {
-        'Garantia': '#22c55e',
-        'SinReparacion': '#f59e0b',
-        'NoAutorizo': '#ef4444',
-        'Reparado': '#3b82f6',
-        'Ninguno': '#94a3b8'
+const referenciaBadgeSeverity = computed(() => {
+    const severityMap: Record<ReferenciaTipo, 'success' | 'warn' | 'info' | 'danger' | 'secondary' | 'contrast'> = {
+        'Garantia': 'info',
+        'SinReparacion': 'warn',
+        'NoAutorizo': 'danger',
+        'Reparado': 'success',
+        'Ninguno': 'secondary'
     }
-    return colorMap[referencias.value] || '#94a3b8'
+    return severityMap[referencias.value] || 'secondary'
 })
 
 const financiero = ref<Financiero>({
@@ -641,23 +642,18 @@ onMounted(() => {
     flex-direction: column;
     flex-shrink: 0;
     line-height: 1;
-}
+    justify-content: end;
+    width: 120px;
 
-.order-date-inline {
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    line-height: 1;
-    padding: 0 0.3rem;
 }
 
 .date-label {
-    font-size: 16px;
+    font-size: 11px;
     color: #64748b;
 }
 
 .date-value {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 600;
     color: #1e293b;
 }
@@ -840,59 +836,28 @@ onMounted(() => {
     font-weight: 700;
 }
 
-.status {
-    font-size: 3em;
-    color:white;
-    background-color: #00f018;
-    padding: 10px;
+.gsfl{
+    background: #3b82f6;
+    color: white;
+    padding: 0.5rem 0.8rem;
     border-radius: 6px;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 600;
 
-}   
-
-.gsfl-wrapper {
+}
+.gsflSection{
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    flex-shrink: 0;
-}
+    gap: 0.4rem;
+    margin-left: 1rem;
+}   
 
-.gsfl-label {
-    font-size: 18px;
-    font-weight: 600;
-    color: white;
-    background-color: #3b82f6;
-    padding: 5px;
-}
-
-.gsfl-input {
-    width: 100%;
+.gsflSection input[type="text"]{
     height: 35px;
-    padding: 0 0.4rem;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #1e293b;
-    text-align: center;
-    background: #fff;
-    outline: none;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-    transition: border-color 0.2s;
-}
+    width: 150px;}
 
-.gsfl-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
-}
-
-/* hide number spinners */
-.gsfl-input::-webkit-outer-spin-button,
-.gsfl-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-.gsfl-input[type=number] {
-    -moz-appearance: textfield;
-}
 </style>
