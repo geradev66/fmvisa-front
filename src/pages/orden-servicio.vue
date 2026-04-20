@@ -13,11 +13,18 @@
                 
             </div>
             <Badge :value="estadoBadgeValue" size="xlarge" :severity="estadoBadgeSeverity" class="Badge-entrega"></Badge>
-            <div class="order-date">
-                <span class="date-label">Fecha</span>
-                <span class="date-value">{{ formatDate(fechas.ingreso) }}</span>
+            <Badge :value="referenciaBadgeValue" size="xlarge" :severity="referenciaBadgeSeverity" class="Badge-entrega"></Badge>
+            <div class="gsflSection">
+                <div class="gsfl">
+                    GSFL
+                </div>
+                <input type="text">
             </div>
             <div class="action-buttons">
+                <div class="order-date">
+                    <span class="date-label">Fecha</span>
+                    <span class="date-value">{{ formatDate(fechas.ingreso) }}</span>
+                </div>
                 <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" size="large" @click="crearNuevaOrden"></Button>
                 <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined size="large" @click="guardarOrden" :loading="loading"></Button>
                 <Button label="Ticket" icon="pi pi-print" severity="secondary" outlined size="large" @click="abrirImprimirTicket" :disabled="!ordenId"></Button>
@@ -234,6 +241,28 @@ const estadoBadgeSeverity = computed(() => {
         'Ninguno': 'secondary'
     }
     return severityMap[estadoOrden.value] || 'secondary'
+})
+
+const referenciaBadgeValue = computed(() => {
+    const labelMap: Record<ReferenciaTipo, string> = {
+        'Garantia': 'Gtia. reparacion',
+        'SinReparacion': 'Sin reparacion',
+        'NoAutorizo': 'No autorizo',
+        'Reparado': 'Reparado',
+        'Ninguno': 'Ninguno'
+    }
+    return labelMap[referencias.value] || 'Ninguno'
+})
+
+const referenciaBadgeSeverity = computed(() => {
+    const severityMap: Record<ReferenciaTipo, 'success' | 'warn' | 'info' | 'danger' | 'secondary' | 'contrast'> = {
+        'Garantia': 'info',
+        'SinReparacion': 'warn',
+        'NoAutorizo': 'danger',
+        'Reparado': 'success',
+        'Ninguno': 'secondary'
+    }
+    return severityMap[referencias.value] || 'secondary'
 })
 
 const financiero = ref<Financiero>({
@@ -697,6 +726,9 @@ onMounted(() => {
     flex-direction: column;
     flex-shrink: 0;
     line-height: 1;
+    justify-content: end;
+    width: 120px;
+
 }
 
 .date-label {
@@ -705,7 +737,7 @@ onMounted(() => {
 }
 
 .date-value {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -887,5 +919,29 @@ onMounted(() => {
     padding: 1.5rem 1.9rem !important;
     font-weight: 700;
 }
+
+.gsfl{
+    background: #3b82f6;
+    color: white;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+
+}
+.gsflSection{
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: 1rem;
+}   
+
+.gsflSection input[type="text"]{
+    height: 35px;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    width: 150px;}
 
 </style>
