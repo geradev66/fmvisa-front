@@ -20,15 +20,35 @@
             <div class="action-buttons">
                 <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" size="large" @click="crearNuevaOrden"></Button>
                 <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined size="large" @click="guardarOrden" :loading="loading"></Button>
-                <Button label="Ticket" icon="pi pi-print" severity="secondary" outlined size="large" @click="imprimirTicket" :disabled="!ordenId"></Button>
+                <Button label="Ticket" icon="pi pi-print" severity="secondary" outlined size="large" @click="abrirImprimirTicket" :disabled="!ordenId"></Button>
                 <Button label="Imprimir" icon="pi pi-file" severity="secondary" outlined size="large" @click="imprimirOrdenCompleta" :disabled="!ordenId"></Button>
-                <Button label="Reporte" icon="pi pi-calendar" severity="secondary" outlined size="large"></Button>
-                <Button label="Salida" icon="pi pi-box" severity="secondary" outlined size="large"></Button>
+                <Button label="Reporte" icon="pi pi-calendar" severity="secondary" outlined size="large" @click="mostrarReporte = true"></Button>
+                <Button label="Salida" icon="pi pi-box" severity="warning" outlined size="large" @click="confirmarSalida" :disabled="!ordenId"></Button>
                 <Button label="Búsqueda" icon="pi pi-search" severity="secondary" outlined size="large" @click="mostrarBusqueda = true"></Button>
+                <Button icon="pi pi-print" severity="secondary" outlined size="large" @click="mostrarImpresoras = true"></Button>
+                <Button :icon="settings.isDark ? 'pi pi-sun' : 'pi pi-moon'" severity="secondary" outlined size="large" @click="settings.toggleDark" v-tooltip="settings.isDark ? 'Modo claro' : 'Modo oscuro'" aria-label="Cambiar tema"></Button>
             </div>
         </div>
 
         <BusquedaOrdenesDialog v-model="mostrarBusqueda" @seleccionar="cargarOrdenDesdeDialogo" />
+        <ReporteDiarioDialog v-model="mostrarReporte" />
+        <PrintersDialog v-model="mostrarImpresoras" />
+        <PrintTicketDialog v-model="mostrarImprimirTicket" :orden="ordenActual" />
+
+        <!-- Diálogo: Confirmar salida -->
+        <Dialog v-model:visible="dialogoSalidaVisible" header="Confirmar Salida" :modal="true" :closable="false" :style="{ width: '420px' }">
+            <div style="display: flex; align-items: flex-start; gap: 0.85rem; line-height: 1.6;">
+                <i class="pi pi-sign-out" style="font-size: 1.6rem; color: #f59e0b; margin-top: 0.1rem; flex-shrink: 0;"></i>
+                <div>
+                    <p style="margin: 0 0 0.4rem; font-weight: 600; font-size: 0.95rem;">¿Registrar salida de la orden <strong>#{{ ordenNumero }}</strong>?</p>
+                    <p style="margin: 0; font-size: 0.85rem; color: #64748b;">Esta acción marcará el equipo como entregado y no podrá revertirse fácilmente.</p>
+                </div>
+            </div>
+            <template #footer>
+                <Button label="Cancelar" severity="secondary" text @click="dialogoSalidaVisible = false" :disabled="loadingSalida" />
+                <Button label="Confirmar Salida" icon="pi pi-sign-out" severity="warning" @click="ejecutarSalida" :loading="loadingSalida" />
+            </template>
+        </Dialog>
 
         <!-- Diálogo: Restaurar borrador -->
         <Dialog v-model:visible="dialogoRestaurarVisible" header="Borrador no guardado" :modal="true" :closable="false" :style="{ width: '400px' }">
@@ -106,6 +126,10 @@ import EquipoForm from '../components/EquipoForm.vue'
 import FinancieroForm from '../components/FinancieroForm.vue'
 import RefaccionesCard from '../components/RefaccionesCard.vue'
 import BusquedaOrdenesDialog from '../components/BusquedaOrdenesDialog.vue'
+import ReporteDiarioDialog from '../components/ReporteDiarioDialog.vue'
+import PrintersDialog from '../components/PrintersDialog.vue'
+import PrintTicketDialog from '../components/PrintTicketDialog.vue'
+import { useSettingsStore } from '../stores/SettingsStore'
 import { type Cliente } from '../models/cliente'
 import { type Equipo } from '../models/equipo'
 import Dialog from 'primevue/dialog'
@@ -114,6 +138,7 @@ import Dialog from 'primevue/dialog'
 
 // Composables
 const ordenService = useOrdenServicioService()
+const settings = useSettingsStore()
 
 const route = useRoute()
 const toast = useToast()
@@ -122,6 +147,11 @@ const toast = useToast()
 const loading = ref<boolean>(false)
 const ordenId = ref<string | null>(null)
 const mostrarBusqueda = ref(false)
+const mostrarReporte = ref(false)
+const mostrarImpresoras = ref(false)
+const mostrarImprimirTicket = ref(false)
+const dialogoSalidaVisible = ref(false)
+const loadingSalida = ref(false)
 
 // Data
 const ordenNumero = ref<string>('')
@@ -327,6 +357,34 @@ const formatDate = (date: Date | null): string => {
 const cargarOrdenDesdeDialogo = (orden: OrdenServicio) => {
     cargarOrden(orden._id!)
 }
+
+// Snapshot de la orden actual para pasarla al diálogo de ticket
+const ordenActual = computed<OrdenServicio | null>(() => {
+    if (!ordenId.value) return null
+    return {
+        _id: ordenId.value,
+        numeroOrden: ordenNumero.value,
+        fechaCreacion: fechas.value.ingreso ?? new Date(),
+        cliente: cliente.value,
+        equipo: equipo.value,
+        fechas: fechas.value,
+        estado: estado.value,
+        estadoOrden: estadoOrden.value,
+        referencias: referencias.value,
+        tipoCargo: tipoCargo.value,
+        financiero: financiero.value,
+        historial: historial.value,
+        refacciones: refacciones.value,
+    }
+})
+
+const abrirImprimirTicket = () => {
+    if (!ordenId.value) {
+        toast.showWarning('Debe guardar la orden primero', 'Orden no Guardada')
+        return
+    }
+    mostrarImprimirTicket.value = true
+}
 // Funciones del servicio
 const crearNuevaOrden = () => {
     limpiarCache()
@@ -479,22 +537,48 @@ const cargarOrden = async (id: string) => {
     }
 }
 
-const imprimirTicket = async () => {
+// const imprimirTicket = async () => {
+//     if (!ordenId.value) {
+//         toast.showWarning('Debe guardar la orden primero', 'Orden no Guardada')
+//         return
+//     }
+//     try {
+//         loading.value = true
+//         const blob = await ordenService.imprimirTicket(ordenId.value)
+//         const url = window.URL.createObjectURL(blob)
+//         window.open(url, '_blank')
+//         toast.showSuccess('Ticket generado correctamente', 'Impresión Exitosa')
+//     } catch (error) {
+//         console.error('Error al imprimir ticket:', error)
+//         toast.showError('Error al imprimir el ticket', 'Error de Impresión')
+//     } finally {
+//         loading.value = false
+//     }
+// }
+
+const confirmarSalida = () => {
     if (!ordenId.value) {
         toast.showWarning('Debe guardar la orden primero', 'Orden no Guardada')
         return
     }
+    dialogoSalidaVisible.value = true
+}
+
+const ejecutarSalida = async () => {
+    if (!ordenId.value) return
     try {
-        loading.value = true
-        const blob = await ordenService.imprimirTicket(ordenId.value)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url, '_blank')
-        toast.showSuccess('Ticket generado correctamente', 'Impresión Exitosa')
-    } catch (error) {
-        console.error('Error al imprimir ticket:', error)
-        toast.showError('Error al imprimir el ticket', 'Error de Impresión')
+        loadingSalida.value = true
+        await ordenService.generarSalida(ordenId.value)
+        dialogoSalidaVisible.value = false
+        estadoOrden.value = 'Entregar'
+        if (!fechas.value.salida) fechas.value.salida = new Date()
+        toast.showSuccess(`Salida registrada para la orden #${ordenNumero.value}`, 'Salida Exitosa')
+    } catch (error: any) {
+        console.error('Error al generar salida:', error)
+        const errorMessage = error.response?.data?.message || 'Error al registrar la salida.'
+        toast.showError(errorMessage, 'Error de Salida')
     } finally {
-        loading.value = false
+        loadingSalida.value = false
     }
 }
 
@@ -599,13 +683,13 @@ onMounted(() => {
 
 .order-label {
     font-size: 11px;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .order-number {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .order-date {
@@ -617,13 +701,13 @@ onMounted(() => {
 
 .date-label {
     font-size: 11px;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .date-value {
     font-size: 13px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .action-buttons {
@@ -789,11 +873,11 @@ onMounted(() => {
     gap: 0.4rem;
     font-size: 13px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .card-title i {
-    color: #3b82f6;
+    color: var(--icon-accent);
     font-size: 13px;
 }
 

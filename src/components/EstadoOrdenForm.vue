@@ -84,7 +84,6 @@
 <script setup lang="ts">
 import Card from 'primevue/card'
 import RadioButton from 'primevue/radiobutton'
-import Divider from 'primevue/divider'
 import Tag from 'primevue/tag'
 import type { EstadoOrden, ReferenciaTipo, TipoCargo } from '../models/orden-servicio'
 
@@ -134,7 +133,7 @@ const getEstadoSeverity = (): string => {
     font-size: 13px;
     font-weight: 600;
     font-size: var(--card-title-font-size);
-    color: #1e293b;
+    color: var(--text-color);
     padding: 0;
     margin: 0;
 }

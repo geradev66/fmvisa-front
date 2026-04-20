@@ -9,7 +9,7 @@ import 'primeicons/primeicons.css'
 
 // Import services and injection keys
 import { OrdenServicioService } from './services/OrdenServicioService';
-import { AuthServiceKey, ClienteServiceKey, EquipoServiceKey, OrdenServicioServiceKey, RefaccionServiceKey, TecnicoServiceKey } from './injection-keys';
+import { AuthServiceKey, ClienteServiceKey, EquipoServiceKey, OrdenServicioServiceKey, RefaccionServiceKey, TecnicoServiceKey, PrinterServiceKey } from './injection-keys';
 
 // Import individual components
 import Button from 'primevue/button';
@@ -40,11 +40,15 @@ import { ClienteService } from './services/ClienteService';
 import { EquipoService } from './services/EquipoService';
 import { RefaccionService } from './services/RefaccionService';
 import { TecnicoService } from './services/TecnicoService';
+import { PrinterService } from './services/PrinterService';
 
 const app = createApp(App);
 app.use(PrimeVue, {
     theme: {
-        preset: Aura
+        preset: Aura,
+        options: {
+            darkModeSelector: '.dark'
+        }
     },
     locale: {
         startsWith: 'Empieza con',
@@ -173,12 +177,14 @@ const clienteService = new ClienteService();
 const equipoService = new EquipoService();
 const refaccionService = new RefaccionService();
 const tecnicoService = new TecnicoService();
+const printerService = new PrinterService();
 app.provide(OrdenServicioServiceKey, ordenServicioService);
 app.provide(AuthServiceKey, authService);
 app.provide(ClienteServiceKey, clienteService);
 app.provide(EquipoServiceKey, equipoService);
 app.provide(RefaccionServiceKey, refaccionService);
 app.provide(TecnicoServiceKey, tecnicoService);
+app.provide(PrinterServiceKey, printerService);
 
 // Provide more services as needed
 // Register components

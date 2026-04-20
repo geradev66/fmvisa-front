@@ -51,6 +51,9 @@
                         <div class="login-footer">
                             <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
                         </div>
+                        <div>
+                            Version {{ appVersion }}
+                        </div>
                     </form>
                 </template>
             </Card>
@@ -84,6 +87,8 @@ const errors = ref({
     username: '',
     password: ''
 })
+
+const appVersion = import.meta.env.VITE_APP_VERSION || '1.0.0'
 
 const rememberMe = ref(false)
 const loading = ref(false)

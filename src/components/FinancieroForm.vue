@@ -81,11 +81,11 @@ const updateField = (field: keyof Financiero, value: number | null) => {
     gap: 0.4rem;
     font-size: var(--card-title-font-size);
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .card-title i {
-    color: #3b82f6;
+    color: var(--icon-accent);
     font-size: var(--card-title-font-size);
 }
 
@@ -105,7 +105,7 @@ const updateField = (field: keyof Financiero, value: number | null) => {
 
 .financial-row label {
     font-size: var(--card-title-font-size);
-    color: #475569;
+    color: var(--text-secondary);
     flex-shrink: 0;
 }
 
@@ -130,13 +130,13 @@ const updateField = (field: keyof Financiero, value: number | null) => {
 .total-value {
     font-size: var(--card-title-font-size);
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .computed-value {
     font-size: var(--card-title-font-size);
     font-weight: 500;
-    color: #1e293b;
+    color: var(--text-primary);
     min-width: 115px;
     text-align: right;
 }

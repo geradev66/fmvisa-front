@@ -569,11 +569,11 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
     gap: 0.4rem;
     font-size: var(--card-title-font-size);
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .card-title i {
-    color: #3b82f6;
+    color: var(--icon-accent);
 }
 
 /* =============================================
@@ -625,7 +625,7 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
 .section-subtitle {
     font-size: .9rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-muted);
     margin-bottom: 0.4rem;
     display: flex;
     align-items: center;
@@ -667,8 +667,8 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     overflow: hidden;
@@ -685,7 +685,7 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
             justify-content: space-between;
             align-items: center;
             padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--border-faint);
             cursor: pointer;
             font-size: 13px;
             transition: background 0.15s ease;
@@ -695,11 +695,11 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
             }
 
             &:hover {
-                background: #f0f9ff;
+                background: var(--surface-hover);
             }
 
             &.equipo-activo {
-                background: #dbeafe;
+                background: var(--surface-selected);
             }
         }
     }
@@ -711,27 +711,27 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
     gap: 0.4rem;
     font-size: 0.72rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     padding: 0.5rem 0.75rem;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--surface-section);
+    border-bottom: 1px solid var(--border-subtle);
 
     i {
         font-size: 0.85rem;
-        color: #94a3b8;
+        color: var(--text-faint);
     }
 }
 
 .equipo-nombre {
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .equipo-serie {
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 /* Dropdown transition */
@@ -762,7 +762,7 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
 .campo label {
     font-size: 12px;
     font-weight: 600;
-    color: #475569;
+    color: var(--text-secondary);
 }
 
 .campos-dobles {

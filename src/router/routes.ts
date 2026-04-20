@@ -1,5 +1,7 @@
 import OrdenServicioPage from '../pages/orden-servicio.vue';
 import LoginPage from '../pages/login.vue';
+import ReporteDiarioPage from '../pages/reporte-diario.vue';
+import OrdenPublicaPage from '../pages/orden-publica.vue';
 
 export const routes = [
     {
@@ -16,5 +18,15 @@ export const routes = [
         path: '/orden-servicio',
         name: 'orden-servicio',
         component: OrdenServicioPage
+    },
+    {
+        path: '/reporte-diario',
+        name: 'reporte-diario',
+        component: ReporteDiarioPage
+    },
+    {
+        path: '/orden/:id',
+        name: 'orden-publica',
+        component: OrdenPublicaPage
     }
 ]

@@ -260,9 +260,9 @@ const actualizarCliente = async () => {
     align-items: center;
     gap: 0.3rem;
     font-size: 0.75rem;
-    color: #2563eb;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
+    color: var(--info-text);
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
     border-radius: 4px;
     padding: 0.35rem 0.6rem;
     margin-top: 0.25rem;
@@ -280,8 +280,8 @@ const actualizarCliente = async () => {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     overflow: hidden;
@@ -292,17 +292,17 @@ const actualizarCliente = async () => {
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 0.75rem;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--surface-section);
+    border-bottom: 1px solid var(--border-subtle);
     font-size: 0.72rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 
     i {
         font-size: 0.85rem;
-        color: #94a3b8;
+        color: var(--text-faint);
     }
 }
 
@@ -319,7 +319,7 @@ const actualizarCliente = async () => {
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-faint);
     cursor: pointer;
     font-size: 13px;
     transition: background 0.15s ease;
@@ -329,22 +329,22 @@ const actualizarCliente = async () => {
     }
 
     &:hover {
-        background: #f0f9ff;
+        background: var(--surface-hover);
     }
 
     &.cliente-activo {
-        background: #dbeafe;
+        background: var(--surface-selected);
     }
 }
 
 .cliente-nombre {
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .cliente-detalle {
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-muted);
     flex-shrink: 0;
 }
 
@@ -375,11 +375,11 @@ const actualizarCliente = async () => {
     gap: 0.5rem;
     font-size: var(--card-title-font-size);
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .card-title i {
-    color: #3b82f6;
+    color: var(--icon-accent);
 }
 
 .form-grid {
@@ -422,7 +422,7 @@ const actualizarCliente = async () => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--overlay-loading);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -433,7 +433,7 @@ const actualizarCliente = async () => {
 
 .loading-text {
     margin-top: 1rem;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 0.875rem;
     font-weight: 500;
 }

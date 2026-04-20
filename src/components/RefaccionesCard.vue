@@ -379,19 +379,19 @@ const nuevaRefaccion = ref<RefaccionCreate>({
     compra: undefined
 })
 
-const abrirDialogoAlta = () => {
-    nuevaRefaccion.value = {
-        nombre: '',
-        aparato: '',
-        precio: undefined,
-        costo: undefined,
-        existencias: undefined,
-        ubicacion: '',
-        compra: undefined
-    }
-    errorAlta.value = ''
-    dialogoAltaVisible.value = true
-}
+// const abrirDialogoAlta = () => {
+//     nuevaRefaccion.value = {
+//         nombre: '',
+//         aparato: '',
+//         precio: undefined,
+//         costo: undefined,
+//         existencias: undefined,
+//         ubicacion: '',
+//         compra: undefined
+//     }
+//     errorAlta.value = ''
+//     dialogoAltaVisible.value = true
+// }
 
 const cerrarDialogoAlta = () => {
     dialogoAltaVisible.value = false
@@ -528,10 +528,10 @@ const refaccionOptionTemplate = (option: RefaccionModel) => {
     return `${option.nombre} (${option.aparato}) - ${option.ubicacion ?? ''}`
 }
 
-const abrirDialogoActualizar = () => {
-    refaccionActualizarSeleccionada.value = null
-    dialogoActualizarVisible.value = true
-}
+// const abrirDialogoActualizar = () => {
+//     refaccionActualizarSeleccionada.value = null
+//     dialogoActualizarVisible.value = true
+// }
 const cerrarDialogoActualizar = () => {
     dialogoActualizarVisible.value = false
 }
@@ -577,10 +577,10 @@ const existenciasActualizar = ref<number | null>(null)
 const guardandoExistencias = ref(false)
 const errorExistencias = ref('')
 
-const abrirDialogoExistencias = () => {
-    refaccionExistenciasSeleccionada.value = null
-    dialogoSeleccionExistenciasVisible.value = true
-}
+// const abrirDialogoExistencias = () => {
+//     refaccionExistenciasSeleccionada.value = null
+//     dialogoSeleccionExistenciasVisible.value = true
+// }
 const cerrarDialogoSeleccionExistencias = () => {
     dialogoSeleccionExistenciasVisible.value = false
 }
@@ -638,7 +638,7 @@ defineExpose({ refacciones })
     gap: 0.4rem;
     font-size: var(--card-title-font-size);
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-color);
 }
 
 .card-title i {

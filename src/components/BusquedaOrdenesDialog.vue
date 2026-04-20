@@ -17,7 +17,7 @@
 
             <!-- Tabla resultados -->
             <DataTable :value="ordenes" :loading="loading" stripedRows selectionMode="single"
-                v-model:selection="seleccionada" dataKey="id" scrollable scrollHeight="380px"
+                v-model:selection="seleccionada" dataKey="_id" scrollable scrollHeight="380px"
                 class="p-datatable-sm resultados-table" @row-dblclick="seleccionarOrden">
                 <template #empty>
                     <div class="empty-msg">No se encontraron órdenes.</div>

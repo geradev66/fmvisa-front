@@ -82,9 +82,7 @@ export class OrdenServicioService {
     }
 
     async obtenerReporteDiario(fecha: string): Promise<any> {
-        const response = await this.api.get(`/reporte-diario`, {
-            params: { fecha }
-        })
+        const response = await this.api.post(`/reporte-diario`, { fecha })
         return response.data
     }
 
@@ -101,4 +99,9 @@ export class OrdenServicioService {
         })
         return response.data
     }
+
+    async generarSalida(id: string): Promise<void> {
+        await this.api.post(`/salida/${id}`)
+    }
+
 }
