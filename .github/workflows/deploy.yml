@@ -33,3 +33,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: / # Cambia esto a la ruta de tu FTP
           local-dir: dist/
+          dangerous-clean-slate: true
