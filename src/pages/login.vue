@@ -4,7 +4,7 @@
             <Card class="login-card">
                 <template #header>
                     <div class="login-header">
-                        <i class="pi pi-lock" style="font-size: 3rem; color: #3b82f6;"></i>
+                        <img src="../../public/1.jpg" alt="FM Visa App Logo">
                         <h1>FM Visa App</h1>
                         <p>Iniciar Sesión</p>
                     </div>
@@ -142,6 +142,10 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+    .login-header img{
+        width: 15rem;
+        height: 15rem;
+    }
 .login-page {
     min-height: 100vh;
     width: 100%;
@@ -256,5 +260,9 @@ const handleLogin = async () => {
     
     .login-header h1 {
         font-size: 1.5rem;
+    }
+    .login-header img{
+        width:9rem;
+        height:9rem;
     }
 }</style>

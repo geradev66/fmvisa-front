@@ -25,8 +25,8 @@
                     <span class="date-label">Fecha</span>
                     <span class="date-value">{{ formatDate(fechas.ingreso) }}</span>
                 </div>
-                <Button label="Nueva Orden" icon="pi pi-plus" severity="primary" size="large" @click="crearNuevaOrden"></Button>
-                <Button label="Guardar" icon="pi pi-save" severity="secondary" outlined size="large" @click="guardarOrden" :loading="loading"></Button>
+                <Button label="Nueva orden"  severity="primary" size="large" @click="crearNuevaOrden"></Button>
+                <Button label="Guardar"  severity="secondary" outlined size="large" @click="guardarOrden" :loading="loading"></Button>
                 <Button label="Ticket" icon="pi pi-print" severity="secondary" outlined size="large" @click="abrirImprimirTicket" :disabled="!ordenId"></Button>
                 <Button label="Imprimir" icon="pi pi-file" severity="secondary" outlined size="large" @click="imprimirOrdenCompleta" :disabled="!ordenId"></Button>
                 <Button label="Reporte" icon="pi pi-calendar" severity="secondary" outlined size="large" @click="mostrarReporte = true"></Button>
@@ -675,8 +675,8 @@ onMounted(() => {
 .top-bar {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 1rem;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
     background: var(--top-bar-bg-color);
     border-radius: 6px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -716,7 +716,7 @@ onMounted(() => {
 }
 
 .order-number {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -727,8 +727,7 @@ onMounted(() => {
     flex-shrink: 0;
     line-height: 1;
     justify-content: end;
-    width: 120px;
-
+    width: 90px;
 }
 
 .date-label {
@@ -737,7 +736,7 @@ onMounted(() => {
 }
 
 .date-value {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -761,8 +760,10 @@ onMounted(() => {
 }
 
 .action-buttons :deep(.p-button) {
-    font-size: .9rem;
-    height: 35px;
+    font-size: 0.82rem;
+    height: 32px;
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
 }
 
 .action-buttons :deep(.p-button-icon) {
@@ -913,35 +914,147 @@ onMounted(() => {
     font-size: 13px;
 }
 
-.Badge-entrega{
-    margin-left: 1rem;
-    font-size: 1.5rem;
-    padding: 1.5rem 1.9rem !important;
+.Badge-entrega {
+    margin-left: 0.25rem;
+    font-size: 0.82rem;
+    padding: 0.45rem 0.8rem !important;
     font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
-.gsfl{
+.gsfl {
     background: #3b82f6;
     color: white;
-    padding: 0.5rem 0.8rem;
+    padding: 0.35rem 0.6rem;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
-
 }
-.gsflSection{
+
+.gsflSection {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    margin-left: 1rem;
-}   
+    gap: 0.35rem;
+    margin-left: 0.4rem;
+    flex-shrink: 0;
+}
 
-.gsflSection input[type="text"]{
-    height: 35px;
-    font-size: 0.9rem;
-    padding: 0.4rem 0.6rem;
+.gsflSection input[type="text"] {
+    height: 32px;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.5rem;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    width: 150px;}
+    width: 120px;
+    background: var(--top-bar-bg-color);
+    color: var(--text-primary);
+}
+
+/* =============================================
+   RESPONSIVE — TOP BAR
+   ============================================= */
+
+/* ── Laptop estándar 1024–1366px ── */
+@media (max-width: 1366px) {
+    .action-buttons :deep(.p-button .p-button-label) {
+        display: none;
+    }
+
+    .action-buttons :deep(.p-button) {
+        height: 30px;
+        min-width: 30px;
+        padding: 0 0.45rem;
+        font-size: 0;
+    }
+
+    .action-buttons :deep(.p-button-icon) {
+        font-size: 13px;
+        margin: 0;
+    }
+
+    /* Sólo "Nueva Orden" y "Guardar" conservan su label */
+    .action-buttons :deep(.p-button:nth-child(2) .p-button-label),
+    .action-buttons :deep(.p-button:nth-child(3) .p-button-label) {
+        display: inline;
+        font-size: 0.8rem;
+    }
+
+    .action-buttons :deep(.p-button:nth-child(2)),
+    .action-buttons :deep(.p-button:nth-child(3)) {
+        padding: 0 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .top-bar {
+        gap: 0.4rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .gsflSection input[type="text"] {
+        width: 90px;
+    }
+}
+
+/* ── Pantalla pequeña / tablet landscape ≤1024px ── */
+@media (max-width: 1024px) {
+    .action-buttons :deep(.p-button .p-button-label) {
+        display: none;
+    }
+
+    .action-buttons :deep(.p-button) {
+        height: 28px;
+        min-width: 28px;
+        padding: 0 0.38rem;
+    }
+
+    .action-buttons :deep(.p-button-icon) {
+        font-size: 12px;
+        margin: 0;
+    }
+
+    .Badge-entrega {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem !important;
+    }
+
+    .order-badge {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+    }
+
+    .gsflSection input[type="text"] {
+        width: 70px;
+    }
+
+    .order-date {
+        width: auto;
+    }
+}
+
+/* ── Móvil / tablet portrait ≤768px — dos filas ── */
+@media (max-width: 768px) {
+    .top-bar {
+        flex-wrap: wrap;
+        padding: 0.4rem 0.5rem;
+        gap: 0.3rem;
+    }
+
+    .action-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.2rem;
+    }
+
+    .Badge-entrega {
+        margin-left: 0;
+    }
+
+    .gsflSection {
+        margin-left: 0;
+    }
+}
 
 </style>
