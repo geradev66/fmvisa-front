@@ -28,6 +28,17 @@ export class OrdenServicioService {
         })
     }
 
+    /**
+     * Abre una nueva pestaña con la URL del PDF de la tarjeta de servicio para la orden dada
+     * @param id El ID de la orden de servicio para la cual se desea mostrar la tarjeta PDF
+     */
+    async showPdfTarjeta(id: string) {
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+        const route = `${baseUrl}/ordenes-servicio/${id}/tarjeta`
+        // Abrir en una nueva pestaña
+        window.open(route, '_blank')
+    }
+
     async crearOrden(dto: CrearOrdenServicioDTO): Promise<OrdenServicio> {
         const response = await this.api.post<OrdenServicio>('/', dto)
         return response.data
@@ -103,5 +114,7 @@ export class OrdenServicioService {
     async generarSalida(id: string): Promise<void> {
         await this.api.post(`/salida/${id}`)
     }
+
+    
 
 }

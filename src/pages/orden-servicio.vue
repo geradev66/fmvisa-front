@@ -617,11 +617,7 @@ const imprimirOrdenCompleta = async () => {
         return
     }
     try {
-        loading.value = true
-        const blob = await ordenService.imprimirOrden(ordenId.value)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url, '_blank')
-        toast.showSuccess('Orden completa generada correctamente', 'Impresión Exitosa')
+        await ordenService.showPdfTarjeta(ordenId.value)
     } catch (error) {
         console.error('Error al imprimir orden:', error)
         toast.showError('Error al imprimir la orden', 'Error de Impresión')
