@@ -56,8 +56,8 @@ export interface PrintPaymentRequest {
     id: string
     identifier?: string
     date: string
-    subtotal: number
-    taxes: number
+    subtotal?: number
+    taxes?: number
     total: number
     change?: number
     openCashDrawer?: boolean

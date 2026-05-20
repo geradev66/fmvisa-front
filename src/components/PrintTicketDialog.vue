@@ -108,13 +108,11 @@ const imprimir = async () => {
     try {
         printing.value = true
 
-        const productos = (orden.refacciones ?? []).map(r => ({
-            quantity: r.cantidad ?? 1,
-            description: r.nombre,
-            sku: r.codigo?.toString() ?? '',
-            price: r.precio ?? 0,
-            total: (r.precio ?? 0) * (r.cantidad ?? 1),
-        }))
+        const productos = [
+            { quantity: 1, description: 'Revisión', sku: '', price: orden.financiero.revision, total: orden.financiero.revision },
+            { quantity: 1, description: 'Anticipo', sku: '', price: orden.financiero.anticipo, total: orden.financiero.anticipo },
+            { quantity: 1, description: 'Pago', sku: '', price: orden.financiero.pagos, total: orden.financiero.pagos },
+        ]
 
         const totalPresupuesto = orden.financiero.presupuesto + orden.financiero.revision
         const totalConIva = totalPresupuesto + orden.financiero.iva
@@ -126,32 +124,31 @@ const imprimir = async () => {
 
         const request: PrintPaymentRequest = {
             port,
-            name: 'SERVICIO TÉCNICO FM VISA',
-            address: 'Calle 5 de Febrero #123, Col. Centro, Ciudad',
-            taxInfo: 'RFC: FMV123456789',
-            phoneNumber: 'Tel: 555-123-4567',
-            email: 'fmvisa@gmail.com',
+            name: 'AGENCIA DE SERVICIO FM VISA',
+            address: 'Avenida Hermosillo 116, Mitras Centro, 64460 Monterrey, N.L.',
+            taxInfo: 'RFC: SAHI830619RA3',
+            phoneNumber: 'WhatsApp:  8134195954',
+            email: 'agencia@fmvisa.com.mx',
             id: orden.numeroOrden,
-            identifier: orden._id ?? '',
+            // identifier: orden._id ?? '',
             date: new Date().toISOString(),
-            subtotal: totalPresupuesto,
-            taxes: orden.financiero.iva,
+            subtotal: undefined,
+            taxes: undefined,
             total: totalConIva,
             change: 0,
             paperWidth: selected.value.ancho,
             openCashDrawer: false,
             customerInfo: orden.cliente ? {
                 name: orden.cliente.nombre,
-                phoneNumber: orden.cliente.celular || orden.cliente.telefono,
-                address: [orden.cliente.domicilio, orden.cliente.colonia, orden.cliente.ciudad]
-                    .filter(Boolean).join(', '),
+                // phoneNumber: orden.cliente.celular || orden.cliente.telefono,
+                // address: [orden.cliente.domicilio, orden.cliente.colonia, orden.cliente.ciudad]
+                //     .filter(Boolean).join(', '),
             } : undefined,
             qrCodeData: qrData,
             products: productos,
-            payments: pagado > 0 ? [{ name: 'Pagado', amount: pagado }] : [],
-            footer: `Estado: ${orden.estadoOrden} · Equipo: ${[orden.equipo?.marca, orden.equipo?.modelo].filter(Boolean).join(' ')}`,
+            payments: pagado > 0 ? [{ name: 'Pagado', amount: pagado }] : []        
         }
-
+        
         await posService.printPayment(request)
         toast.showSuccess('Ticket impreso correctamente', 'Impresión Exitosa')
         visible.value = false
