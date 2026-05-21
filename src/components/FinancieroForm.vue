@@ -88,7 +88,7 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const { calcularSubtotal, calcularPagos, calcularSaldo, calcularTotal, calcularPresupuesto } = useOrdenServicio()
+const { calcularSubtotal, calcularPagos, calcularSaldo, calcularPresupuesto } = useOrdenServicio()
 
 const formatCurrency = (value: number): string =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)

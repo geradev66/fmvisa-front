@@ -152,6 +152,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         referencias: "Ninguno",
         tipoCargo: "CargoRegular",
         financiero: {
+            manoDeObra: 1200,
             presupuesto: 1500,
             revision: 300,
             anticipo: 500,
@@ -199,6 +200,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         referencias: "Ninguno",
         tipoCargo: "CargoRegular",
         financiero: {
+                manoDeObra: 2000,
             presupuesto: 2800,
             revision: 350,
             anticipo: 1000,
@@ -252,6 +254,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         referencias: "Reparado",
         tipoCargo: "CargoRegular",
         financiero: {
+            manoDeObra: 2500,
             presupuesto: 4500,
             revision: 400,
             anticipo: 2000,
@@ -305,6 +308,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         referencias: "NoAutorizo",
         tipoCargo: "SinCargo",
         financiero: {
+            manoDeObra: 0,
             presupuesto: 1200,
             revision: 250,
             anticipo: 0,
@@ -364,6 +368,7 @@ export const OrdenServicioMockDb : OrdenServicio[] = [
         referencias: "Garantia",
         tipoCargo: "GarantiaVendor",
         financiero: {
+            manoDeObra: 0,
             presupuesto: 1800,
             revision: 300,
             anticipo: 0,
