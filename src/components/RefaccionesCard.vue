@@ -7,7 +7,8 @@
             </div>
         </template>
         <template #content>
-            <div class="tabla-refacciones">
+            <div class="refacciones-content">
+                <div class="tabla-refacciones">
                 <div class="tabla-actions">
                     <Button icon="pi pi-plus" label="Agregar refacción" severity="primary" size="small"
                         @click="abrirDialogoSeleccion" />
@@ -18,6 +19,7 @@
                     <!-- <Button icon="pi pi-bookmark" label="Nueva Refacción" severity="secondary" size="small"
                         @click="abrirDialogoAlta" /> -->
                 </div>
+                <ConceptosFijosCard :financiero="financiero" @update:financiero="emit('update:financiero', $event)" />
                 <DataTable :value="refacciones" v-model:selection="refaccionSeleccionada" selectionMode="single"
                     dataKey="codigo" editMode="cell" @cell-edit-complete="onCellEditComplete"
                     class="p-datatable-sm refacciones-table" stripedRows scrollable scrollHeight="flex">
@@ -83,6 +85,7 @@
                         </template>
                     </Column>
                 </DataTable>
+                </div>
             </div>
         </template>
     </Card>
@@ -277,15 +280,18 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import { useRefaccionService } from '../composables/useRefaccionService'
+import ConceptosFijosCard from './ConceptosFijosCard.vue'
 import type { Refaccion as RefaccionModel, RefaccionCreate } from '../models/refaccion'
-import type { RefaccionItem } from '../models/orden-servicio'
+import type { RefaccionItem, Financiero } from '../models/orden-servicio'
 
 interface Props {
     modelValue: RefaccionItem[]
+    financiero: Financiero
 }
 
 interface Emits {
     (e: 'update:modelValue', v: RefaccionItem[]): void
+    (e: 'update:financiero', v: Financiero): void
 }
 
 const props = defineProps<Props>()
@@ -297,64 +303,22 @@ type RefaccionPartida = RefaccionItem
 const refaccionService = useRefaccionService()
 
 // ── Estado de la tabla ──
-const createDefaultRefacciones = (): RefaccionItem[] => ([
-    {
-        codigo: 1,
-        nombre: 'REVISION',
-        aparato: 'REVISION',
-        cantidad: 1,
-        precio: null,
-        costo: null,
-        existencia: null,
-        ubicacion: '',
-        compraCosto: null,
-        fechaPresupuesto: null,
-        catalogId: null,
-        guardandoEnCatalogo: false
-    },
-    {
-        codigo: 2,
-        nombre: 'ANTICIPO',
-        aparato: 'ANTICIPO',
-        cantidad: 1,
-        precio: null,
-        costo: null,
-        existencia: null,
-        ubicacion: '',
-        compraCosto: null,
-        fechaPresupuesto: null,
-        catalogId: null,
-        guardandoEnCatalogo: false
-    },
-    {
-        codigo: 3,
-        nombre: 'MANO DE OBRA',
-        aparato: 'MANO DE OBRA',
-        cantidad: 1,
-        precio: null,
-        costo: null,
-        existencia: null,
-        ubicacion: '',
-        compraCosto: null,
-        fechaPresupuesto: null,
-        catalogId: null,
-        guardandoEnCatalogo: false
-    }
-])
-
-const refacciones = ref<RefaccionItem[]>(props.modelValue && props.modelValue.length > 0 ? [...props.modelValue] : createDefaultRefacciones())
+const refacciones = ref<RefaccionItem[]>(props.modelValue && props.modelValue.length > 0 ? [...props.modelValue] : [])
 const refaccionSeleccionada = ref<RefaccionItem | null>(null)
 
 // Sincronizar cuando el padre reemplaza el array (ej. nueva orden o restaurar borrador)
-watch(() => props.modelValue, (val) => { 
-    if (!val || val.length === 0) {
-        refacciones.value = createDefaultRefacciones()
-    } else {
-        refacciones.value = val
-    }
+// La bandera evita que el watch de refacciones emita de vuelta al padre y genere un ciclo infinito
+let sincronizandoDesdeParent = false
+watch(() => props.modelValue, (val) => {
+    sincronizandoDesdeParent = true
+    refacciones.value = val && val.length > 0 ? [...val] : []
+    sincronizandoDesdeParent = false
 })
-// Emitir hacia el padre en cada cambio interno
-watch(refacciones, (val) => emit('update:modelValue', val), { deep: true })
+// flush:'sync' hace que este watcher dispare INMEDIATAMENTE al mutar el array,
+// así la bandera sigue activa cuando se evalúa y se omite el emit al padre
+watch(refacciones, (val) => {
+    if (!sincronizandoDesdeParent) emit('update:modelValue', val)
+}, { deep: true, flush: 'sync' })
 
 // ── Catálogo cargado del servicio ──
 const catalogo = ref<RefaccionModel[]>([])
@@ -696,9 +660,20 @@ defineExpose({ refacciones })
     color: #3b82f6;
 }
 
+.refacciones-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    gap: 0.3rem;
+}
+
 .tabla-refacciones {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
     gap: 0.3rem;
 }
 

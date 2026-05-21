@@ -97,13 +97,14 @@
                     <FinancieroForm
                         v-model:financiero="financiero"
                         :pendiente="estado.pendiente"
+                        :refacciones="refacciones"
                         @update:pendiente="estado.pendiente = $event"
                     />
                 </div>
 
                 <!-- Panel Refacciones: spans cols 2-3 -->
                 <div class="panel-refacciones">
-                    <RefaccionesCard v-model="refacciones" />
+                    <RefaccionesCard v-model="refacciones" v-model:financiero="financiero" />
                 </div>
             </div>
         </div>
@@ -111,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watchEffect, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import Button from 'primevue/button'
 import { Badge } from 'primevue'
 import type { 
@@ -268,6 +269,7 @@ const referenciaBadgeSeverity = computed(() => {
 const financiero = ref<Financiero>({
     presupuesto: 0.00,
     revision: 0.00,
+    manoDeObra: 0.00,
     anticipo: 0.00,
     pagos: 0.00,
     iva: 0.00
@@ -360,19 +362,6 @@ watch(estadoOrden, (nuevoEstado) => {
     }
 })
 
-// Actualizar campos financieros calculables cuando cambien las refacciones
-watchEffect(() => {
-    const partidas = refacciones.value
-    const revision = partidas.find(r => r.nombre?.toUpperCase().trim() === 'REVISION')
-    const revisionMonto = revision ? ((revision.precio ?? 0) * (revision.cantidad ?? 1)) : 0
-    const presupuesto = partidas
-        .filter(r => r.nombre?.toUpperCase().trim() !== 'REVISION')
-        .reduce((acc, r) => acc + ((r.precio ?? 0) * (r.cantidad ?? 1)), 0)
-    const iva = (presupuesto + revisionMonto) * 0.16
-    financiero.value.presupuesto = presupuesto
-    financiero.value.revision = revisionMonto
-    financiero.value.iva = iva
-})
 
 const formatDate = (date: Date | null): string => {
     if (!date) return '—'
@@ -464,6 +453,7 @@ const crearNuevaOrden = () => {
     financiero.value = {
         presupuesto: 0.00,
         revision: 0.00,
+        manoDeObra: 0.00,
         anticipo: 0.00,
         pagos: 0.00,
         iva: 0.00
@@ -550,7 +540,7 @@ const cargarOrden = async (id: string) => {
         estadoOrden.value = orden.estadoOrden
         referencias.value = orden.referencias
         tipoCargo.value = orden.tipoCargo
-        financiero.value = orden.financiero
+        financiero.value = { ...orden.financiero, manoDeObra: orden.financiero.manoDeObra ?? 0 }
         historial.value = orden.historial
         if (Array.isArray(orden.refacciones)) {
             refacciones.value = orden.refacciones.map(r => ({

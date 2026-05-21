@@ -48,6 +48,7 @@ export interface RefaccionItem {
 export interface Financiero {
     presupuesto: number;
     revision: number;
+    manoDeObra: number;
     anticipo: number;
     pagos: number;
     iva: number;

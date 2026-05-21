@@ -1,11 +1,21 @@
 // composables/useOrdenServicio.ts
 
-import type { Financiero } from "../models/orden-servicio"
+import type { Financiero, RefaccionItem } from "../models/orden-servicio"
 
 export function useOrdenServicio() {
-    // Total = presupuesto + revision + iva (anticipo y pagos pendientes de implementar)
+    // Total = presupuesto (incluye manoDeObra + refacciones) + revision
     const calcularSubtotal = (financiero: Financiero): number => {
-        return financiero.presupuesto + financiero.revision + financiero.iva
+        return financiero.presupuesto + financiero.revision
+    }
+
+    const calcularPagos = (financiero: Financiero): number => {
+        return financiero.anticipo + financiero.pagos
+    }
+
+    const calcularSaldo = (financiero: Financiero): number => {
+        const subtotal = calcularSubtotal(financiero)
+        const pagos = calcularPagos(financiero)
+        return subtotal - pagos
     }
 
     const calcularTotal = (financiero: Financiero): number => {
@@ -13,8 +23,19 @@ export function useOrdenServicio() {
         return subtotal + financiero.iva
     }
 
+    const calcularPresupuesto = (refacciones: RefaccionItem[], financiero: Financiero): number => {
+        const refaccionesTotal = refacciones.reduce(
+            (acc, r) => acc + ((r.precio ?? 0) * (r.cantidad ?? 1)),
+            0
+        )
+        return refaccionesTotal + (financiero.manoDeObra ?? 0)
+    }
+
     return {
         calcularSubtotal,
-        calcularTotal
+        calcularTotal,
+        calcularSaldo,
+        calcularPagos,
+        calcularPresupuesto
     }
 }
