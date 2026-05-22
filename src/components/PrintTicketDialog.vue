@@ -124,6 +124,7 @@ const imprimir = async () => {
 
         const request: PrintPaymentRequest = {
             port,
+            ...(selected.value.tipo === 'usb' && { connectionType: 'Usb', usbPrinterName: selected.value.nombre }),
             name: 'AGENCIA DE SERVICIO FM VISA',
             address: 'Avenida Hermosillo 116, Mitras Centro, 64460 Monterrey, N.L.',
             taxInfo: 'RFC: SAHI830619RA3',

@@ -43,11 +43,15 @@ export interface PrinterCashierReport {
 export interface PrintTestRequest {
     port: string
     paperWidth?: 58 | 80 | 112
+    connectionType?: 'Usb' | 'Network' | 'Serial' | 'Windows'
+    usbPrinterName?: string
 }
 
 export interface PrintPaymentRequest {
     port: string
     paperWidth?: 58 | 80 | 112
+    connectionType?: 'Usb' | 'Network' | 'Serial' | 'Windows'
+    usbPrinterName?: string
     name: string
     address?: string
     email?: string
@@ -71,6 +75,8 @@ export interface PrintPaymentRequest {
 export interface PrintPreparationRequest {
     port: string
     paperWidth?: 58 | 80 | 112
+    connectionType?: 'Usb' | 'Network' | 'Serial' | 'Windows'
+    usbPrinterName?: string
     id: string
     identifier?: string
     date: string
@@ -80,11 +86,15 @@ export interface PrintPreparationRequest {
 export interface PrintCashierReportRequest {
     port: string
     paperWidth?: 58 | 80 | 112
+    connectionType?: 'Usb' | 'Network' | 'Serial' | 'Windows'
+    usbPrinterName?: string
     cashier: PrinterCashierReport
 }
 
 export interface OpenCashDrawerRequest {
     port: string
+    connectionType?: 'Usb' | 'Network' | 'Serial' | 'Windows'
+    usbPrinterName?: string
 }
 
 // --- Response types ---
@@ -114,7 +124,8 @@ export class POSPrinterService {
     private api: AxiosInstance
 
     constructor() {
-        const baseURL = import.meta.env.VITE_PRINTER_API_URL || 'https://localhost:5001/api/print'
+        const baseURL = import.meta.env.VITE_PRINTER_API_URL || 'http://localhost:5150/api/print'
+        console.log(`POSPrinterService initialized with baseURL: ${baseURL}`)
         this.api = axios.create({
             baseURL,
             headers: {

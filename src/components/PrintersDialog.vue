@@ -78,13 +78,13 @@
 
                 <!-- Puerto — serial / usb -->
                 <div class="field" v-if="form.tipo === 'serial' || form.tipo === 'usb'">
-                    <label>Puerto <span class="required">*</span></label>
-                    <InputText v-model="form.puerto" placeholder="Ej: COM3" :invalid="!!errors.puerto" fluid />
+                    <label>{{ form.tipo === 'usb' ? 'Nombre Impresora USB' : 'Puerto Serial' }} <span class="required">*</span></label>
+                    <InputText v-model="form.puerto" :placeholder="form.tipo === 'usb' ? 'Ej: EPSON TM-T20' : 'Ej: COM3'" :invalid="!!errors.puerto" fluid />
                     <small class="error" v-if="errors.puerto">{{ errors.puerto }}</small>
                 </div>
 
                 <!-- USB extra fields -->
-                <template v-if="form.tipo === 'usb'">
+                <!-- <template v-if="form.tipo === 'usb'">
                     <div class="field">
                         <label>Vendor ID</label>
                         <InputText v-model="form.vendorId" placeholder="Ej: 0x04b8" fluid />
@@ -93,7 +93,7 @@
                         <label>Product ID</label>
                         <InputText v-model="form.productId" placeholder="Ej: 0x0202" fluid />
                     </div>
-                </template>
+                </template> -->
 
                 <!-- Network fields -->
                 <template v-if="form.tipo === 'network'">
@@ -341,7 +341,10 @@ const testPrint = async (printer: Printer) => {
     }
     try {
         testingId.value = printer._id ?? null
-        await posService.testPrint({ port })
+        await posService.testPrint({
+            port,
+            ...(printer.tipo === 'usb' && { connectionType: 'Usb', usbPrinterName: printer.nombre })
+        })
         toast.showSuccess(`Test enviado a "${printer.nombre}" correctamente`, 'Test exitoso')
     } catch (err: any) {
         const msg = err?.response?.data?.message ?? 'No se pudo conectar con la impresora'
