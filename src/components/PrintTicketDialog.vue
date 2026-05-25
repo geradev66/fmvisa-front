@@ -119,7 +119,7 @@ const imprimir = async () => {
             productos.push({
                 quantity: r.cantidad ?? 1,
                 description: r.nombre ?? 'Refacción',
-                sku: r.codigo.toString() ?? '',
+                sku: '',
                 price: r.precio ?? 0,
                 total: (r.precio ?? 0) * (r.cantidad ?? 1),
                 isPayment: false,
@@ -167,6 +167,7 @@ const imprimir = async () => {
         toast.showSuccess('Ticket impreso correctamente', 'Impresión Exitosa')
         visible.value = false
     } catch (err: any) {
+        console.error('Error al imprimir:', err)
         const msg = err?.response?.data?.message ?? 'No se pudo imprimir el ticket'
         toast.showError(msg, 'Error de Impresión')
     } finally {
