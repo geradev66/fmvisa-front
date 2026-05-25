@@ -8,6 +8,7 @@ export interface PrinterProductItem {
     sku: string
     price?: number
     total?: number
+    isPayment?: boolean
 }
 
 export interface PrinterPaymentItem {
@@ -68,6 +69,7 @@ export interface PrintPaymentRequest {
     customerInfo?: PrinterCustomerInfo
     products: PrinterProductItem[]
     payments: PrinterPaymentItem[]
+    totalPaid?: number
     footer?: string
     qrCodeData?: string
 }

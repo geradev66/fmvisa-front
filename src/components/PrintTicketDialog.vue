@@ -108,13 +108,25 @@ const imprimir = async () => {
     try {
         printing.value = true
 
-        const productos = [
+        let productos = [
             { quantity: 1, description: 'Revisión', sku: '', price: orden.financiero.revision, total: orden.financiero.revision },
-            { quantity: 1, description: 'Anticipo', sku: '', price: orden.financiero.anticipo, total: orden.financiero.anticipo },
-            { quantity: 1, description: 'Pago', sku: '', price: orden.financiero.pagos, total: orden.financiero.pagos },
+            { quantity: 1, description: 'Anticipo', sku: '', price: orden.financiero.anticipo, total: orden.financiero.anticipo, isPayment: true },
+            { quantity: 1, description: 'Pagos', sku: '', price: orden.financiero.pagos, total: orden.financiero.pagos, isPayment: true },
         ]
 
-        const totalPresupuesto = orden.financiero.presupuesto + orden.financiero.revision
+        //Agregar las demas refacciones como productos
+        orden.refacciones?.forEach(r => {
+            productos.push({
+                quantity: r.cantidad ?? 1,
+                description: r.nombre ?? 'Refacción',
+                sku: r.codigo.toString() ?? '',
+                price: r.precio ?? 0,
+                total: (r.precio ?? 0) * (r.cantidad ?? 1),
+                isPayment: false,
+            })
+        })
+
+        const totalPresupuesto = productos.reduce((sum, p) => sum + (p.isPayment ? 0 : (p.total ?? 0)), 0)
         const totalConIva = totalPresupuesto + orden.financiero.iva
         const pagado = orden.financiero.anticipo + orden.financiero.pagos
 
@@ -147,6 +159,7 @@ const imprimir = async () => {
             } : undefined,
             qrCodeData: qrData,
             products: productos,
+            totalPaid: pagado,
             payments: pagado > 0 ? [{ name: 'Pagado', amount: pagado }] : []        
         }
         
