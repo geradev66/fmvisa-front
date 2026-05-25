@@ -53,30 +53,30 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <InputText size="small" id="marca" :modelValue="equipo.marca"
-                                            @update:modelValue="updateEquipo('marca', $event)" />
-                                        <label for="marca">Tipo</label>
+                                        <InputText size="small" id="tipo" :modelValue="equipo.tipo"
+                                            @update:modelValue="updateEquipo('tipo', $event)" />
+                                        <label for="tipo">Tipo</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
                                         <InputText size="small" id="modelo" :modelValue="equipo.modelo"
                                             @update:modelValue="updateEquipo('modelo', $event)" />
-                                        <label for="modelo">Marca</label>
+                                        <label for="modelo">Modelo</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
                                         <InputText size="small" id="noSerie" :modelValue="equipo.noSerie"
                                             @update:modelValue="updateEquipo('noSerie', $event)" />
-                                        <label for="noSerie">Modelo</label>
+                                        <label for="noSerie">Número de Serie</label>
                                     </FloatLabel>
                                 </div>
                                 <div class="form-field">
                                     <FloatLabel variant="on">
-                                        <InputText size="small" id="tipo" :modelValue="equipo.tipo"
-                                            @update:modelValue="updateEquipo('tipo', $event)" />
-                                        <label for="tipo">Serie</label>
+                                        <InputText size="small" id="noSerie" :modelValue="equipo.noSerie"
+                                            @update:modelValue="updateEquipo('noSerie', $event)" />
+                                        <label for="noSerie">Serie</label>
                                     </FloatLabel>
                                 </div>
                             </div>
