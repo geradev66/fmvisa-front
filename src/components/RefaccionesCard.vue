@@ -74,6 +74,12 @@
                                 style="width: 100%" />
                         </template>
                     </Column>
+                    <Column field="formaPago" header="Pago" style="width: 100px; min-width: 100px">
+                        <template #editor="{ data }">
+                            <Select v-model="data.formaPago" :options="opcionesPago" placeholder="Seleccionar"
+                                style="width: 100%" />
+                        </template>
+                    </Column>
                     <Column header="" style="width: 28px; min-width: 28px; text-align: center">
                         <template #body="{ data }">
                             <i v-if="data.guardandoEnCatalogo" class="pi pi-spin pi-spinner"
@@ -300,6 +306,8 @@ const emit = defineEmits<Emits>()
 // ── Alias local ──
 type RefaccionPartida = RefaccionItem
 
+const opcionesPago = ['Efectivo', 'Tarjeta', 'Transferencia', 'Cheques', 'Otro']
+
 const refaccionService = useRefaccionService()
 
 // ── Estado de la tabla ──
@@ -373,6 +381,7 @@ const confirmarSeleccion = () => {
         ubicacion: r.ubicacion ?? '',
         compraCosto: r.compra ?? null,
         fechaPresupuesto: null,
+        formaPago: undefined,
         catalogId: r._id ?? null,
         guardandoEnCatalogo: false
     })
@@ -446,6 +455,7 @@ const agregarFilaVacia = () => {
         ubicacion: '',
         compraCosto: null,
         fechaPresupuesto: null,
+        formaPago: undefined,
         catalogId: null,
         guardandoEnCatalogo: false
     })

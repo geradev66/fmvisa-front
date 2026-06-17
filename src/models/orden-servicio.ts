@@ -39,6 +39,7 @@ export interface RefaccionItem {
     ubicacion: string
     compraCosto: number | null
     fechaPresupuesto: Date | null
+    formaPago?: string
     catalogId: string | null   // null = fila nueva sin guardar en catálogo; truthy = guardada
     guardandoEnCatalogo: boolean
 }

@@ -145,15 +145,21 @@
                                             </div>
                                         </div>
                                         <div v-if="equipo.formaPago === 'Otro'" class="otro-pago-field">
-                                            <FloatLabel variant="on">
-                                                <InputText
-                                                    size="small"
-                                                    id="formaPagoEspecifique"
-                                                    :modelValue="equipo.formaPagoEspecifique"
-                                                    @update:modelValue="updateEquipo('formaPagoEspecifique', $event)"
-                                                />
-                                                <label for="formaPagoEspecifique">Especifique</label>
-                                            </FloatLabel>
+                                            <div class="otro-cheques-row">
+                                                <FloatLabel variant="on">
+                                                    <InputText
+                                                        size="small"
+                                                        id="formaPagoEspecifique"
+                                                        :modelValue="equipo.formaPagoEspecifique"
+                                                        @update:modelValue="updateEquipo('formaPagoEspecifique', $event)"
+                                                    />
+                                                    <label for="formaPagoEspecifique">Especifique</label>
+                                                </FloatLabel>
+                                                <div class="check-option">
+                                                    <Checkbox inputId="cheques" :binary="true" v-model="esCheques" />
+                                                    <label for="cheques">Cheques</label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                             </div>
@@ -178,7 +184,7 @@
                                     <FloatLabel variant="on">
                                         <label class="field-label">Fecha de Salida</label>
                                         <DatePicker size="large" :modelValue="fechas.salida"
-                                            @update:modelValue="updateFechas('salida', $event)" 
+                                            @update:modelValue="updateFechas('salida', $event)"
                                             showIcon />
                                     </FloatLabel>
                                 </div>
@@ -341,13 +347,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, watch, onMounted, computed, onUnmounted } from 'vue'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import FloatLabel from 'primevue/floatlabel'
 import Textarea from 'primevue/textarea'
 import DatePicker from 'primevue/datepicker'
 import RadioButton from 'primevue/radiobutton'
+import Checkbox from 'primevue/checkbox'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -380,6 +387,17 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+const esCheques = ref(false)
+
+watch(esCheques, (checked) => {
+    if (checked) {
+        emit('update:equipo', { ...props.equipo, formaPago: 'Cheques', formaPagoEspecifique: '' })
+    } else if (props.equipo.formaPago === 'Cheques') {
+        emit('update:equipo', { ...props.equipo, formaPago: 'Otro' })
+    }
+})
+
 // ── Búsqueda de equipo existente ──
 const equipoService = useEquipoService()
 const todosLosEquipos = ref<Equipo[]>([])
@@ -516,6 +534,7 @@ const updateEquipo = (field: keyof Equipo, value: any) => {
 }
 
 const onFormaPagoChange = (value: string) => {
+    esCheques.value = false
     const nextEquipo: Equipo = { ...props.equipo, formaPago: value }
     if (value !== 'Otro') {
         nextEquipo.formaPagoEspecifique = ''
@@ -558,9 +577,20 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
     gap: 0.25rem;
 }
 
+.check-option {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
 .otro-pago-field {
     margin-top: 0.75rem;
-    max-width: 240px;
+}
+
+.otro-cheques-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .card-title {

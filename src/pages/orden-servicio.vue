@@ -12,8 +12,13 @@
                 </div>
                 
             </div>
-            <Badge :value="estadoBadgeValue" size="xlarge" :severity="estadoBadgeSeverity" class="Badge-entrega"></Badge>
-            <Badge :value="referenciaBadgeValue" size="xlarge" :severity="referenciaBadgeSeverity" class="Badge-entrega"></Badge>
+            <Badge
+                v-if="estadoOrden === 'Entregar'"
+                :value="estadoBadgeValue"
+                size="xlarge"
+                :severity="estadoBadgeSeverity"
+                class="Badge-entrega"
+            ></Badge>
             <div class="gsflSection">
                 <div class="gsfl">
                     GSFL
@@ -112,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, watchEffect } from 'vue'
 import Button from 'primevue/button'
 import { Badge } from 'primevue'
 import type { 
@@ -212,24 +217,16 @@ const refacciones = ref<RefaccionItem[]>([])
 // Removed comment
 
 const estadoOrden = ref<EstadoOrden>('Refacción')
+const fechaEntrega = ref<Date | null>(null)
 const referencias = ref<ReferenciaTipo>('Garantia')
 const tipoCargo = ref<TipoCargo>('CargoRegular')
 
 const estadoBadgeValue = computed(() => {
-    if (estadoOrden.value === 'Entregar') {
-        const fechaSalida = fechas.value.salida ? formatDate(fechas.value.salida) : formatDate(new Date())
-        return `Entregado - ${fechaSalida}`
+    if (estadoOrden.value !== 'Entregar') return ''
+    if (fechaEntrega.value) {
+        return `Entregado ${formatDate(fechaEntrega.value)}`
     }
-
-    const labelMap: Record<EstadoOrden, string> = {
-        'Pendiente': 'Pendiente',
-        'Autoriza': 'Autorizar',
-        'Informa': 'Información',
-        'Refacción': 'Refacción',
-        'Entregar': 'Entregado',
-        'Ninguno': 'Ninguno'
-    }
-    return labelMap[estadoOrden.value] || 'Pendiente'
+    return 'Entregado'
 })
 
 const estadoBadgeSeverity = computed(() => {
@@ -356,12 +353,28 @@ watch(
     { deep: true }
 )
 
-watch(estadoOrden, (nuevoEstado) => {
-    if (nuevoEstado === 'Entregar' && !fechas.value.salida) {
-        fechas.value.salida = new Date()
-    }
+// Actualizar campos financieros calculables cuando cambien las refacciones
+watchEffect(() => {
+    const partidas = refacciones.value
+    const revision = partidas.find(r => r.nombre?.toUpperCase().trim() === 'REVISION')
+    const revisionMonto = revision ? ((revision.precio ?? 0) * (revision.cantidad ?? 1)) : 0
+    const presupuesto = partidas
+        .filter(r => r.nombre?.toUpperCase().trim() !== 'REVISION')
+        .reduce((acc, r) => acc + ((r.precio ?? 0) * (r.cantidad ?? 1)), 0)
+    const iva = (presupuesto + revisionMonto) * 0.16
+    financiero.value.presupuesto = presupuesto
+    financiero.value.revision = revisionMonto
+    financiero.value.iva = iva
 })
 
+
+watch(estadoOrden, (nuevo) => {
+    if (nuevo === 'Entregar' && !fechaEntrega.value) {
+        fechaEntrega.value = new Date()
+    } else if (nuevo !== 'Entregar') {
+        fechaEntrega.value = null
+    }
+})
 
 const formatDate = (date: Date | null): string => {
     if (!date) return '—'
@@ -590,7 +603,6 @@ const ejecutarSalida = async () => {
         await ordenService.generarSalida(ordenId.value)
         dialogoSalidaVisible.value = false
         estadoOrden.value = 'Entregar'
-        if (!fechas.value.salida) fechas.value.salida = new Date()
         toast.showSuccess(`Salida registrada para la orden #${ordenNumero.value}`, 'Salida Exitosa')
     } catch (error: any) {
         console.error('Error al generar salida:', error)
@@ -607,7 +619,11 @@ const imprimirOrdenCompleta = async () => {
         return
     }
     try {
-        await ordenService.showPdfTarjeta(ordenId.value)
+        loading.value = true
+        const blob = await ordenService.imprimirOrden(ordenId.value)
+        const url = window.URL.createObjectURL(blob)
+        window.open(url, '_blank')
+        toast.showSuccess('Orden completa generada correctamente', 'Impresión Exitosa')
     } catch (error) {
         console.error('Error al imprimir orden:', error)
         toast.showError('Error al imprimir la orden', 'Error de Impresión')

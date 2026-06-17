@@ -126,13 +126,14 @@ const handleLogin = async () => {
     loading.value = true
     
     try {
+        console.log(credentials.value)
         const response = await authService.login(credentials.value.username, credentials.value.password)
         authStore.setUser(response.user)
         authStore.setToken(response.token)
         toast.showSuccess(`¡Bienvenido ${response.user.firstName}!`, 'Inicio de sesión exitoso')
         router.push('/orden-servicio')
-    } catch (error: any) {
-        console.error('Login error:', error)
+    } catch (error: any) {   
+        
         const errorMessage = error.response?.data?.message || 'Usuario o contraseña incorrectos'
         toast.showError(errorMessage, 'Error al iniciar sesión')
     } finally {
