@@ -38,6 +38,7 @@ export interface RefaccionItem {
     existencia: number | null
     ubicacion: string
     compraCosto: number | null
+    pago?: number | null
     fechaPresupuesto: Date | null
     formaPago?: string
     catalogId: string | null   // null = fila nueva sin guardar en catálogo; truthy = guardada
@@ -75,6 +76,28 @@ export type TipoCargo =
     | 'SinCargo' 
     | 'GarantiaVendor';
 
+/** Fechas con fechas serializadas como ISO strings, tal como las espera/devuelve el backend */
+export interface FechasPayload {
+    ingreso: string | null;
+    salida: string | null;
+    autorizacion: string | null;
+    llegadaRefaccion: string | null;
+    pedidoRefaccion?: string | null;
+    presupuesto?: string | null;
+}
+
+/** EstadoEquipo con fechas serializadas como ISO strings */
+export interface EstadoEquipoPayload {
+    pendiente: string;
+    enviadoANombre: string;
+    fechaEnvio: string | null;
+    notasEnvio: string;
+    reparadoPor: string;
+    fechaReparacion: string | null;
+    descripcionReparacion: string;
+    noPedido: string;
+}
+
 export interface OrdenServicio {
     _id?: string;
     numeroOrden: string;
@@ -89,16 +112,53 @@ export interface OrdenServicio {
     financiero: Financiero;
     historial: HistorialItem[];
     refacciones?: RefaccionItem[];
+    formaPago?: string;
+    formaPagoEspecifique?: string;
+    formaPagoCheque?: string;
 }
 
 // DTOs para API
+
+/** Refacción tal como la espera el backend (sin campos exclusivos del frontend) */
+export interface RefaccionItemDTO {
+    refaccionId?: string | null;
+    codigo?: number | string;
+    nombre?: string;
+    aparato?: string;
+    cantidad: number;
+    precio: number;
+    costo?: number | null;
+    pago?: number | null;
+}
+
 export interface CrearOrdenServicioDTO {
     cliente?: Cliente;
     equipo?: Equipo;
-    fechas: Fechas;
-    refacciones?: RefaccionItem[];
+    estadoOrden?: EstadoOrden;
+    referencias?: ReferenciaTipo;
+    tipoCargo?: TipoCargo;
+    fechas: FechasPayload;
+    estado?: EstadoEquipoPayload;
+    financiero?: Partial<Financiero>;
+    refacciones?: RefaccionItemDTO[];
+    formaPago?: string;
+    formaPagoEspecifique?: string;
+    formaPagoCheque?: string;
 }
 
-export interface ActualizarOrdenServicioDTO extends Partial<OrdenServicio> {
-    id: string;
+export interface ActualizarOrdenServicioDTO {
+    cliente?: Cliente;
+    equipo?: Equipo;
+    estadoOrden?: EstadoOrden;
+    referencias?: ReferenciaTipo;
+    tipoCargo?: TipoCargo;
+    fechas?: FechasPayload;
+    estado?: EstadoEquipoPayload;
+    financiero?: Partial<Financiero>;
+    refacciones?: RefaccionItemDTO[];
+    formaPago?: string;
+    formaPagoEspecifique?: string;
+    formaPagoCheque?: string;
+    accionHistorial?: string;
+    usuarioHistorial?: string;
 }

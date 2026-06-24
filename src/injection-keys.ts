@@ -6,6 +6,7 @@ import type { EquipoService } from './services/EquipoService'
 import type { RefaccionService } from './services/RefaccionService'
 import type { TecnicoService } from './services/TecnicoService'
 import type { PrinterService } from './services/PrinterService'
+import type { PagoService } from './services/PagoService'
 
 // Símbolos de inyección para servicios
 export const OrdenServicioServiceKey: InjectionKey<OrdenServicioService> = 
@@ -28,5 +29,7 @@ export const TecnicoServiceKey: InjectionKey<TecnicoService> =
 
 export const PrinterServiceKey: InjectionKey<PrinterService> =
     Symbol('PrinterService')
-    
+
+export const PagoServiceKey: InjectionKey<PagoService> =
+    Symbol('PagoService')
 

@@ -97,6 +97,13 @@ export class OrdenServicioService {
         return response.data
     }
 
+    async obtenerReporteSalidas(fechaInicio: string, fechaFin?: string): Promise<any[]> {
+        const body: { fechaInicio: string; fechaFin?: string } = { fechaInicio }
+        if (fechaFin) body.fechaFin = fechaFin
+        const response = await this.api.post('/reporte-salidas', body)
+        return Array.isArray(response.data) ? response.data : (response.data?.data ?? [])
+    }
+
     async imprimirTicket(id: string): Promise<Blob> {
         const response = await this.api.get(`/${id}/ticket`, {
             responseType: 'blob'

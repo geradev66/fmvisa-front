@@ -94,7 +94,7 @@ cp .env.example .env
 Configura la URL de tu API:
 
 ```env
-VITE_API_URL=http://localhost:3000/api
+VITE_API_URL=http://localhost:3010/api
 ```
 
 ## Servicios Disponibles

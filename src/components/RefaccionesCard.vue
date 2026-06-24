@@ -74,12 +74,19 @@
                                 style="width: 100%" />
                         </template>
                     </Column>
-                    <Column field="formaPago" header="Pago" style="width: 100px; min-width: 100px">
+                     <Column field="pago" header="Pago" style="width: 100px; min-width: 100px">
+                        <template #body="{ data }">{{ formatCurrency(data.pago) }}</template>
+                        <template #editor="{ data, field }">
+                            <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US"
+                                style="width: 100%" />
+                        </template>
+                    </Column>
+                    <!-- <Column field="formaPago" header="Pago" style="width: 100px; min-width: 100px">
                         <template #editor="{ data }">
                             <Select v-model="data.formaPago" :options="opcionesPago" placeholder="Seleccionar"
                                 style="width: 100%" />
                         </template>
-                    </Column>
+                    </Column> -->
                     <Column header="" style="width: 28px; min-width: 28px; text-align: center">
                         <template #body="{ data }">
                             <i v-if="data.guardandoEnCatalogo" class="pi pi-spin pi-spinner"

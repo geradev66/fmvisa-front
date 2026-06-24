@@ -103,7 +103,11 @@
                         v-model:financiero="financiero"
                         :pendiente="estado.pendiente"
                         :refacciones="refacciones"
+                        :ordenId="ordenId"
+                        :pagosList="pagosList"
+                        :totalPagado="totalPagado"
                         @update:pendiente="estado.pendiente = $event"
+                        @pagosChanged="recargarPagos"
                     />
                 </div>
 
@@ -134,6 +138,10 @@ import type {
 import { useOrdenServicioService } from '../composables/useOrdenServicioService'
 import {useRoute } from 'vue-router'
 import { useToast } from '../composables/useToast'
+import { usePagoService } from '../composables/usePagoService'
+import type { Pago } from '../models/pago'
+import type { CrearOrdenServicioDTO, ActualizarOrdenServicioDTO, RefaccionItemDTO } from '../models/orden-servicio'
+import { serializeFechas, serializeEstado, deserializeFechas, deserializeEstado } from '../utils/fechas'
 import ClienteForm from '../components/ClienteForm.vue'
 import EquipoForm from '../components/EquipoForm.vue'
 import FinancieroForm from '../components/FinancieroForm.vue'
@@ -151,6 +159,7 @@ import Dialog from 'primevue/dialog'
 
 // Composables
 const ordenService = useOrdenServicioService()
+const pagoService = usePagoService()
 const settings = useSettingsStore()
 
 const route = useRoute()
@@ -214,7 +223,8 @@ const historial = ref<HistorialItem[]>([])
 
 const refacciones = ref<RefaccionItem[]>([])
 
-// Removed comment
+const pagosList = ref<Pago[]>([])
+const totalPagado = ref(0)
 
 const estadoOrden = ref<EstadoOrden>('Refacción')
 const fechaEntrega = ref<Date | null>(null)
@@ -298,13 +308,7 @@ const guardarEnCache = () => {
     } catch { /* cuota excedida, ignorar */ }
 }
 
-const parseFechas = (raw: any) => {
-    const result: any = {}
-    for (const key in raw) {
-        result[key] = raw[key] ? new Date(raw[key]) : null
-    }
-    return result
-}
+const parseFechas = deserializeFechas
 
 const restaurarDesdeCache = () => {
     const raw = localStorage.getItem(CACHE_KEY)
@@ -316,11 +320,7 @@ const restaurarDesdeCache = () => {
         if (d.cliente) cliente.value = d.cliente
         if (d.equipo) equipo.value = d.equipo
         if (d.fechas) fechas.value = parseFechas(d.fechas)
-        if (d.estado) estado.value = {
-            ...d.estado,
-            fechaEnvio: d.estado.fechaEnvio ? new Date(d.estado.fechaEnvio) : null,
-            fechaReparacion: d.estado.fechaReparacion ? new Date(d.estado.fechaReparacion) : null,
-        }
+        if (d.estado) estado.value = deserializeEstado(d.estado)
         if (d.estadoOrden) estadoOrden.value = d.estadoOrden
         if (d.referencias) referencias.value = d.referencias
         if (d.tipoCargo) tipoCargo.value = d.tipoCargo
@@ -356,14 +356,9 @@ watch(
 // Actualizar campos financieros calculables cuando cambien las refacciones
 watchEffect(() => {
     const partidas = refacciones.value
-    const revision = partidas.find(r => r.nombre?.toUpperCase().trim() === 'REVISION')
-    const revisionMonto = revision ? ((revision.precio ?? 0) * (revision.cantidad ?? 1)) : 0
-    const presupuesto = partidas
-        .filter(r => r.nombre?.toUpperCase().trim() !== 'REVISION')
-        .reduce((acc, r) => acc + ((r.precio ?? 0) * (r.cantidad ?? 1)), 0)
-    const iva = (presupuesto + revisionMonto) * 0.16
+    const presupuesto = partidas.reduce((acc, r) => acc + ((r.precio ?? 0) * (r.cantidad ?? 1)), 0)
+    const iva = (presupuesto + financiero.value.revision) * 0.16
     financiero.value.presupuesto = presupuesto
-    financiero.value.revision = revisionMonto
     financiero.value.iva = iva
 })
 
@@ -416,6 +411,17 @@ const abrirImprimirTicket = () => {
     }
     mostrarImprimirTicket.value = true
 }
+const recargarPagos = async () => {
+    if (!ordenId.value) return
+    try {
+        const res = await pagoService.obtenerPagosOrden(ordenId.value)
+        pagosList.value = res.data
+        totalPagado.value = res.totalPagado
+    } catch (e) {
+        console.error('Error al recargar pagos', e)
+    }
+}
+
 // Funciones del servicio
 const crearNuevaOrden = () => {
     limpiarCache()
@@ -472,55 +478,77 @@ const crearNuevaOrden = () => {
         iva: 0.00
     }
     refacciones.value = []
+    pagosList.value = []
+    totalPagado.value = 0
 }
 
 const guardarOrden = async () => {
     try {
         loading.value = true
-        
-        const ordenData: OrdenServicio = {
-            _id: ordenId.value || undefined,
-            numeroOrden: ordenNumero.value,
-            fechaCreacion: new Date(),
-            cliente: cliente.value,
-            equipo: equipo.value,
-            fechas: fechas.value,
-            estado: estado.value,
+        const esNueva = !ordenId.value
+
+        // Strip empty _id so the backend knows whether to create or update the sub-document
+        const clientePayload = { ...cliente.value }
+        if (!clientePayload._id) delete clientePayload._id
+
+        const equipoPayload = { ...equipo.value }
+        if (!equipoPayload._id) delete equipoPayload._id
+
+        // Map refacciones to the API shape (rename catalogId → refaccionId, drop frontend-only fields)
+        const refaccionesDTO: RefaccionItemDTO[] = refacciones.value.map(r => ({
+            refaccionId: r.catalogId || undefined,
+            codigo: r.codigo,
+            nombre: r.nombre,
+            aparato: r.aparato,
+            cantidad: r.cantidad ?? 0,
+            precio: r.precio ?? 0,
+            costo: r.costo ?? undefined,
+            pago: r.pago ?? undefined,
+        }))
+
+        const basePayload: CrearOrdenServicioDTO = {
+            cliente: clientePayload,
+            equipo: equipoPayload,
             estadoOrden: estadoOrden.value,
             referencias: referencias.value,
             tipoCargo: tipoCargo.value,
+            fechas: serializeFechas(fechas.value),
+            estado: serializeEstado(estado.value),
             financiero: financiero.value,
-            historial: historial.value,
-            refacciones: refacciones.value
+            refacciones: refaccionesDTO,
         }
 
-        
-
         if (ordenId.value) {
-            // Actualizar orden existente
-            await ordenService.actualizarOrden(ordenId.value, {
-                ...ordenData,
-                id: ordenId.value
-            })
+            const updatePayload: ActualizarOrdenServicioDTO = {
+                ...basePayload,
+                accionHistorial: 'Orden actualizada',
+                usuarioHistorial: 'Usuario Actual',
+            }
+            const updated = await ordenService.actualizarOrden(ordenId.value, updatePayload)
+            // Sync IDs from the response in case the backend updated sub-documents
+            if (updated.cliente) cliente.value = updated.cliente
+            if (updated.equipo) equipo.value = updated.equipo
             toast.showSuccess(`Orden #${ordenNumero.value} actualizada correctamente`, 'Orden Actualizada')
         } else {
-            // Crear nueva orden
-            const nuevaOrden = await ordenService.crearOrden(
-                ordenData
-            )
+            const nuevaOrden = await ordenService.crearOrden(basePayload)
             ordenId.value = nuevaOrden._id || null
             ordenNumero.value = nuevaOrden.numeroOrden
+            // Sync client and equipo with the IDs assigned by the backend — critical for future updates
+            if (nuevaOrden.cliente) cliente.value = nuevaOrden.cliente
+            if (nuevaOrden.equipo) equipo.value = nuevaOrden.equipo
+            if (nuevaOrden.historial) historial.value = nuevaOrden.historial
             toast.showSuccess(`Orden #${nuevaOrden.numeroOrden} creada exitosamente`, 'Orden Creada')
         }
 
         limpiarCache()
 
-        // Agregar entrada al historial
-        historial.value.push({
-            fecha: new Date().toLocaleDateString('es-MX'),
-            accion: ordenId.value ? 'Actualización de orden' : 'Creación de orden',
-            usuario: 'Usuario Actual'
-        })
+        if (!esNueva) {
+            historial.value.push({
+                fecha: new Date().toLocaleDateString('es-MX'),
+                accion: 'Actualización de orden',
+                usuario: 'Usuario Actual'
+            })
+        }
     } catch (error: any) {
         console.error('Error al guardar orden:', error)
         const errorMessage = error.response?.data?.message || 'Error al guardar la orden. Por favor intenta de nuevo.'
@@ -544,17 +572,14 @@ const cargarOrden = async (id: string) => {
         if (orden.equipo) {
             equipo.value = orden.equipo
         }
-        fechas.value = parseFechas(orden.fechas)
-        estado.value = {
-            ...orden.estado,
-            fechaEnvio: orden.estado.fechaEnvio ? new Date(orden.estado.fechaEnvio) : null,
-            fechaReparacion: orden.estado.fechaReparacion ? new Date(orden.estado.fechaReparacion) : null,
-        }
+        fechas.value = deserializeFechas(orden.fechas)
+        estado.value = deserializeEstado(orden.estado)
         estadoOrden.value = orden.estadoOrden
         referencias.value = orden.referencias
         tipoCargo.value = orden.tipoCargo
         financiero.value = { ...orden.financiero, manoDeObra: orden.financiero.manoDeObra ?? 0 }
         historial.value = orden.historial
+        await recargarPagos()
         if (Array.isArray(orden.refacciones)) {
             refacciones.value = orden.refacciones.map(r => ({
                 ...r,
@@ -620,9 +645,7 @@ const imprimirOrdenCompleta = async () => {
     }
     try {
         loading.value = true
-        const blob = await ordenService.imprimirOrden(ordenId.value)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url, '_blank')
+        await ordenService.showPdfTarjeta(ordenId.value)
         toast.showSuccess('Orden completa generada correctamente', 'Impresión Exitosa')
     } catch (error) {
         console.error('Error al imprimir orden:', error)

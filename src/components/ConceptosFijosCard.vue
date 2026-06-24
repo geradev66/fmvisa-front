@@ -72,7 +72,7 @@ const formatCurrency = (value: number | null): string => {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value)
 }
 </script>
-
+e
 <style scoped>
 .conceptos-fijos-section {
     flex-shrink: 0;

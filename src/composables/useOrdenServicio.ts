@@ -4,22 +4,23 @@ import type { Financiero, RefaccionItem } from "../models/orden-servicio"
 
 export function useOrdenServicio() {
     // Total = presupuesto (incluye manoDeObra + refacciones) + revision
-    const calcularSubtotal = (financiero: Financiero): number => {
-        return financiero.presupuesto + financiero.revision
+    const calcularSubtotal = (refacciones: RefaccionItem[], financiero: Financiero): number => {
+        const presupuesto = calcularPresupuesto(refacciones, financiero)
+        return presupuesto + financiero.revision
     }
 
     const calcularPagos = (financiero: Financiero): number => {
         return financiero.anticipo + financiero.pagos
     }
 
-    const calcularSaldo = (financiero: Financiero): number => {
-        const subtotal = calcularSubtotal(financiero)
+    const calcularSaldo = (refacciones: RefaccionItem[], financiero: Financiero): number => {
+        const subtotal = calcularSubtotal(refacciones, financiero)
         const pagos = calcularPagos(financiero)
         return subtotal - pagos
     }
 
-    const calcularTotal = (financiero: Financiero): number => {
-        const subtotal = calcularSubtotal(financiero)
+    const calcularTotal = (refacciones: RefaccionItem[], financiero: Financiero): number => {
+        const subtotal = calcularSubtotal(refacciones, financiero)
         return subtotal + financiero.iva
     }
 

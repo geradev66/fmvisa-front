@@ -124,44 +124,6 @@
                                         <label for="pendiente">Pendiente</label>
                                     </FloatLabel>
                                 </div>
-                                    <div class="radio-section">
-                                        <span class="section-subtitle"> Forma de Pago</span>
-                                        <div class="radio-grid">
-                                            <div class="radio-option">
-                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="onFormaPagoChange" inputId="efectivo" value="Efectivo" />
-                                                <label for="efectivo">Efectivo</label>
-                                            </div>
-                                            <div class="radio-option">
-                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="onFormaPagoChange" inputId="tarjeta" value="Tarjeta" />
-                                                <label for="tarjeta">Tarjeta</label>
-                                            </div>
-                                            <div class="radio-option">
-                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="onFormaPagoChange" inputId="transferencia" value="Transferencia" />
-                                                <label for="transferencia">Transferencia</label>
-                                            </div>
-                                            <div class="radio-option">
-                                                <RadioButton :modelValue="equipo.formaPago" @update:modelValue="onFormaPagoChange" inputId="otro" value="Otro" />
-                                                <label for="otro">Otro</label>
-                                            </div>
-                                        </div>
-                                        <div v-if="equipo.formaPago === 'Otro'" class="otro-pago-field">
-                                            <div class="otro-cheques-row">
-                                                <FloatLabel variant="on">
-                                                    <InputText
-                                                        size="small"
-                                                        id="formaPagoEspecifique"
-                                                        :modelValue="equipo.formaPagoEspecifique"
-                                                        @update:modelValue="updateEquipo('formaPagoEspecifique', $event)"
-                                                    />
-                                                    <label for="formaPagoEspecifique">Especifique</label>
-                                                </FloatLabel>
-                                                <div class="check-option">
-                                                    <Checkbox inputId="cheques" :binary="true" v-model="esCheques" />
-                                                    <label for="cheques">Cheques</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                             </div>
                         </div>
                     </TabPanel>
@@ -353,8 +315,6 @@ import InputText from 'primevue/inputtext'
 import FloatLabel from 'primevue/floatlabel'
 import Textarea from 'primevue/textarea'
 import DatePicker from 'primevue/datepicker'
-import RadioButton from 'primevue/radiobutton'
-import Checkbox from 'primevue/checkbox'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -387,16 +347,6 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
-
-const esCheques = ref(false)
-
-watch(esCheques, (checked) => {
-    if (checked) {
-        emit('update:equipo', { ...props.equipo, formaPago: 'Cheques', formaPagoEspecifique: '' })
-    } else if (props.equipo.formaPago === 'Cheques') {
-        emit('update:equipo', { ...props.equipo, formaPago: 'Otro' })
-    }
-})
 
 // ── Búsqueda de equipo existente ──
 const equipoService = useEquipoService()
@@ -476,6 +426,8 @@ const onBusquedaEquipoChange = (val: string | undefined) => {
     mostrarSugerenciasEquipo.value = true
 }
 
+
+
 const seleccionarEquipo = (equipo: Equipo) => {
     emit('update:equipo', { ...equipo })
     busquedaEquipo.value = `${equipo.marca} ${equipo.modelo} - S/N: ${equipo.tipo}`
@@ -509,6 +461,9 @@ const abrirDialogoTecnico = () => {
     dialogoTecnicoVisible.value = true
 }
 
+const updateFormaPagoCheque = (_value: string | undefined) => {}
+const updateFormaPagoEspecifique = (_value: string | undefined) => {}
+
 const guardarNuevoTecnico = async () => {
     if (!nuevoTecnico.value.nombre.trim()) {
         errorTecnico.value = 'El nombre es obligatorio.'
@@ -531,15 +486,6 @@ const guardarNuevoTecnico = async () => {
 // Update helpers — emit immutable copies upward
 const updateEquipo = (field: keyof Equipo, value: any) => {
     emit('update:equipo', { ...props.equipo, [field]: value })
-}
-
-const onFormaPagoChange = (value: string) => {
-    esCheques.value = false
-    const nextEquipo: Equipo = { ...props.equipo, formaPago: value }
-    if (value !== 'Otro') {
-        nextEquipo.formaPagoEspecifique = ''
-    }
-    emit('update:equipo', nextEquipo)
 }
 
 const updateFechas = (field: keyof Fechas, value: any) => {
@@ -567,8 +513,9 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
 
 
 .radio-grid {
-    display: flex;
-    gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .25rem;
 }
 
 .radio-option {
@@ -591,6 +538,7 @@ const updateEstado = (field: keyof EstadoEquipo, value: any) => {
     display: flex;
     align-items: center;
     gap: 1rem;
+    width: 100%;
 }
 
 .card-title {
