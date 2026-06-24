@@ -1,9 +1,9 @@
 <template>
     <Dialog
         v-model:visible="visible"
-        :header="tipoReporte === 'entradas' ? 'Reporte Diario de Entrada de Equipos' : 'Reporte de Salidas de Equipos'"
+        :header="dialogHeader"
         modal
-        :style="{ width: '420px' }"
+        :style="{ width: '440px' }"
     >
         <div class="reporte-dialog-body">
             <!-- Selector de tipo de reporte -->
@@ -35,7 +35,7 @@
             </template>
 
             <!-- Campos para Salidas -->
-            <template v-else>
+            <template v-else-if="tipoReporte === 'salidas'">
                 <div class="field">
                     <label for="fechaInicio">Fecha inicio</label>
                     <DatePicker
@@ -62,6 +62,55 @@
                     />
                 </div>
             </template>
+
+            <!-- Campos para Pagos -->
+            <template v-else>
+                <div class="field">
+                    <label>Fecha inicio <span class="req">*</span></label>
+                    <DatePicker
+                        v-model="pagosInicio"
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        :maxDate="new Date()"
+                        placeholder="Fecha de inicio"
+                        class="w-full"
+                    />
+                </div>
+                <div class="field">
+                    <label>Fecha fin <span class="opcional">(opcional)</span></label>
+                    <DatePicker
+                        v-model="pagosFin"
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        :minDate="pagosInicio ?? undefined"
+                        :maxDate="new Date()"
+                        placeholder="Fecha de fin (opcional)"
+                        class="w-full"
+                    />
+                </div>
+                <div class="field">
+                    <label>Tipo <span class="opcional">(opcional)</span></label>
+                    <Select
+                        v-model="pagosTipo"
+                        :options="tiposPago"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Todos los tipos"
+                        showClear
+                        class="w-full"
+                    />
+                </div>
+                <div class="field">
+                    <label>Forma de pago <span class="opcional">(opcional)</span></label>
+                    <Select
+                        v-model="pagosFormaPago"
+                        :options="formasPago"
+                        placeholder="Todas las formas"
+                        showClear
+                        class="w-full"
+                    />
+                </div>
+            </template>
         </div>
 
         <template #footer>
@@ -82,6 +131,7 @@ import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import SelectButton from 'primevue/selectbutton'
+import Select from 'primevue/select'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ (e: 'update:modelValue', val: boolean): void }>()
@@ -91,19 +141,43 @@ const visible = computed({
     set: (val) => emit('update:modelValue', val)
 })
 
-const tipoReporte = ref<'entradas' | 'salidas'>('entradas')
+const tipoReporte = ref<'entradas' | 'salidas' | 'pagos'>('entradas')
 const tiposReporte = [
     { label: 'Entradas', value: 'entradas' },
-    { label: 'Salidas',  value: 'salidas'  }
+    { label: 'Salidas',  value: 'salidas'  },
+    { label: 'Pagos',    value: 'pagos'    }
 ]
 
+const dialogHeader = computed(() => {
+    if (tipoReporte.value === 'entradas') return 'Reporte Diario de Entrada de Equipos'
+    if (tipoReporte.value === 'salidas')  return 'Reporte de Salidas de Equipos'
+    return 'Reporte de Pagos'
+})
+
+// Entradas
 const fechaEntrada = ref<Date | null>(new Date())
+
+// Salidas
 const fechaInicio  = ref<Date | null>(new Date())
 const fechaFin     = ref<Date | null>(null)
 
-const puedeGenerar = computed(() =>
-    tipoReporte.value === 'entradas' ? !!fechaEntrada.value : !!fechaInicio.value
-)
+// Pagos
+const pagosInicio     = ref<Date | null>(new Date())
+const pagosFin        = ref<Date | null>(null)
+const pagosTipo       = ref<string | null>(null)
+const pagosFormaPago  = ref<string | null>(null)
+
+const tiposPago  = [
+    { label: 'Pago',     value: 'pago'     },
+    { label: 'Anticipo', value: 'anticipo' }
+]
+const formasPago = ['Efectivo', 'Tarjeta', 'Cheque', 'Transferencia', 'Otro']
+
+const puedeGenerar = computed(() => {
+    if (tipoReporte.value === 'entradas') return !!fechaEntrada.value
+    if (tipoReporte.value === 'salidas')  return !!fechaInicio.value
+    return !!pagosInicio.value
+})
 
 function toIsoDateStr(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -113,11 +187,18 @@ const abrirReporte = () => {
     if (tipoReporte.value === 'entradas') {
         if (!fechaEntrada.value) return
         window.open(`/reporte-diario?fecha=${toIsoDateStr(fechaEntrada.value)}`, '_blank')
-    } else {
+    } else if (tipoReporte.value === 'salidas') {
         if (!fechaInicio.value) return
         const params = new URLSearchParams({ fechaInicio: toIsoDateStr(fechaInicio.value) })
         if (fechaFin.value) params.set('fechaFin', toIsoDateStr(fechaFin.value))
         window.open(`/reporte-salidas?${params.toString()}`, '_blank')
+    } else {
+        if (!pagosInicio.value) return
+        const params = new URLSearchParams({ fechaInicio: toIsoDateStr(pagosInicio.value) })
+        if (pagosFin.value)       params.set('fechaFin',    toIsoDateStr(pagosFin.value))
+        if (pagosTipo.value)      params.set('tipo',         pagosTipo.value)
+        if (pagosFormaPago.value) params.set('formaPago',    pagosFormaPago.value)
+        window.open(`/reporte-pagos?${params.toString()}`, '_blank')
     }
     visible.value = false
 }
@@ -144,6 +225,7 @@ const abrirReporte = () => {
     font-size: 0.8rem;
     color: var(--p-text-muted-color, #6b7280);
 }
+.req { color: #ef4444; }
 .tipo-selector {
     display: flex;
 }
@@ -156,4 +238,3 @@ const abrirReporte = () => {
     justify-content: center;
 }
 </style>
-

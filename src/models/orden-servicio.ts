@@ -29,6 +29,8 @@ export interface HistorialItem {
 }
 
 export interface RefaccionItem {
+    internalId?: string
+    refaccionId?: string | null
     codigo: number
     nombre: string
     aparato: string
@@ -52,6 +54,11 @@ export interface Financiero {
     revision: number;
     manoDeObra: number;
     anticipo: number;
+    anticipoFormaPago?: string;
+    anticipoReferencia?: string;
+    anticipoNotas?: string;
+    //Relacion con 'Pago' para vincular el anticipo con los pagos realizados
+    anticipoPagoId?: string;
     pagos: number;
     iva: number;
 }
@@ -121,6 +128,7 @@ export interface OrdenServicio {
 
 /** Refacción tal como la espera el backend (sin campos exclusivos del frontend) */
 export interface RefaccionItemDTO {
+    internalId?: string;
     refaccionId?: string | null;
     codigo?: number | string;
     nombre?: string;
@@ -161,4 +169,10 @@ export interface ActualizarOrdenServicioDTO {
     formaPagoCheque?: string;
     accionHistorial?: string;
     usuarioHistorial?: string;
+}
+
+
+export function createInternalId(): string {
+    // Genera un ID interno único para las refacciones
+    return 'ref_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
 }

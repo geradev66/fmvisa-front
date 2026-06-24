@@ -2,6 +2,7 @@ import OrdenServicioPage from '../pages/orden-servicio.vue';
 import LoginPage from '../pages/login.vue';
 import ReporteDiarioPage from '../pages/reporte-diario.vue';
 import ReporteSalidasPage from '../pages/reporte-salidas.vue';
+import ReportePagosPage from '../pages/reporte-pagos.vue';
 import UsuariosPage from '../pages/usuarios.vue';
 import TecnicosPage from '../pages/tecnicos.vue';
 import RefaccionesPage from '../pages/refacciones.vue';
@@ -32,6 +33,11 @@ export const routes = [
         path: '/reporte-salidas',
         name: 'reporte-salidas',
         component: ReporteSalidasPage
+    },
+    {
+        path: '/reporte-pagos',
+        name: 'reporte-pagos',
+        component: ReportePagosPage
     },
     {
         path: '/usuarios',

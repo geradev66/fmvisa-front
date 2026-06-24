@@ -21,7 +21,9 @@ export function useOrdenServicio() {
 
     const calcularTotal = (refacciones: RefaccionItem[], financiero: Financiero): number => {
         const subtotal = calcularSubtotal(refacciones, financiero)
-        return subtotal + financiero.iva
+        // return subtotal + financiero.iva
+        // Por ahora, no se aplica IVA a la orden de servicio, solo se muestra el subtotal
+        return subtotal;
     }
 
     const calcularPresupuesto = (refacciones: RefaccionItem[], financiero: Financiero): number => {

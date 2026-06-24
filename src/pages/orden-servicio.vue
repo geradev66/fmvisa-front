@@ -180,7 +180,9 @@
 
                 <!-- Panel Refacciones: spans cols 2-3 -->
                 <div class="panel-refacciones">
-                    <RefaccionesCard v-model="refacciones" v-model:financiero="financiero" />
+                    <RefaccionesCard v-model="refacciones" v-model:financiero="financiero"
+                        :ordenId="ordenId" :pagosList="pagosList"
+                        @pagosChanged="recargarPagos" />
                 </div>
             </div>
         </div>
@@ -429,7 +431,7 @@ const guardarEnCache = () => {
 
 const parseFechas = deserializeFechas
 
-const restaurarDesdeCache = () => {
+const restaurarDesdeCache = async () => {
     const raw = localStorage.getItem(CACHE_KEY)
     if (!raw) return
     try {
@@ -452,6 +454,7 @@ const restaurarDesdeCache = () => {
             }))
         }
         dialogoRestaurarVisible.value = false
+        await recargarPagos()
         toast.showSuccess('Borrador restaurado correctamente', 'Borrador')
     } catch {
         localStorage.removeItem(CACHE_KEY)
@@ -615,6 +618,7 @@ const guardarOrden = async () => {
 
         // Map refacciones to the API shape (rename catalogId → refaccionId, drop frontend-only fields)
         const refaccionesDTO: RefaccionItemDTO[] = refacciones.value.map(r => ({
+            internalId: r.internalId,
             refaccionId: r.catalogId || undefined,
             codigo: r.codigo,
             nombre: r.nombre,
@@ -647,6 +651,9 @@ const guardarOrden = async () => {
             // Sync IDs from the response in case the backend updated sub-documents
             if (updated.cliente) cliente.value = updated.cliente
             if (updated.equipo) equipo.value = updated.equipo
+            if (updated.financiero?.anticipoPagoId !== undefined) {
+                financiero.value = { ...financiero.value, anticipoPagoId: updated.financiero.anticipoPagoId }
+            }
             toast.showSuccess(`Orden #${ordenNumero.value} actualizada correctamente`, 'Orden Actualizada')
         } else {
             const nuevaOrden = await ordenService.crearOrden(basePayload)
@@ -656,10 +663,15 @@ const guardarOrden = async () => {
             if (nuevaOrden.cliente) cliente.value = nuevaOrden.cliente
             if (nuevaOrden.equipo) equipo.value = nuevaOrden.equipo
             if (nuevaOrden.historial) historial.value = nuevaOrden.historial
+            if (nuevaOrden.financiero?.anticipoPagoId) {
+                financiero.value = { ...financiero.value, anticipoPagoId: nuevaOrden.financiero.anticipoPagoId }
+            }
             toast.showSuccess(`Orden #${nuevaOrden.numeroOrden} creada exitosamente`, 'Orden Creada')
         }
 
         limpiarCache()
+        // Reload payments so any anticipo created/updated by the backend appears in the summary
+        await recargarPagos()
 
         if (!esNueva) {
             historial.value.push({

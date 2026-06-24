@@ -74,11 +74,15 @@
                                 style="width: 100%" />
                         </template>
                     </Column>
-                     <Column field="pago" header="Pago" style="width: 100px; min-width: 100px">
-                        <template #body="{ data }">{{ formatCurrency(data.pago) }}</template>
-                        <template #editor="{ data, field }">
-                            <InputNumber v-model="data[field]" mode="currency" currency="USD" locale="en-US"
-                                style="width: 100%" />
+                     <Column header="Pago" style="width: 140px; min-width: 140px">
+                        <template #body="{ data }">
+                            <div class="pago-ref-cell">
+                                <span>{{ formatCurrency(totalPagadoRefaccion(data.internalId)) }}</span>
+                                <Button icon="pi pi-plus" size="small" text rounded severity="success"
+                                    v-tooltip.top="ordenId ? 'Agregar pago' : 'Guarde la orden primero'"
+                                    :disabled="!ordenId || !data.internalId"
+                                    @click="abrirPagoRefaccion(data)" />
+                            </div>
                         </template>
                     </Column>
                     <!-- <Column field="formaPago" header="Pago" style="width: 100px; min-width: 100px">
@@ -102,6 +106,50 @@
             </div>
         </template>
     </Card>
+
+    <!-- ══ Diálogo: Pago de Refacción ══ -->
+    <Dialog v-model:visible="dialogoPagoRefaccionVisible" header="Agregar Pago a Refacción" modal
+        style="width: 400px" @hide="resetPagoRefaccionForm">
+        <div v-if="refaccionParaPago" class="dialogo-alta">
+            <div class="pago-ref-info">
+                <span class="pago-ref-nombre">{{ refaccionParaPago.nombre }}</span>
+                <span class="pago-ref-stats">
+                    Precio: {{ formatCurrency(refaccionParaPago.precio) }} &nbsp;·&nbsp;
+                    Pagado: {{ formatCurrency(totalPagadoRefaccion(refaccionParaPago.internalId)) }} &nbsp;·&nbsp;
+                    Pendiente: <strong>{{ formatCurrency((refaccionParaPago.precio ?? 0) - totalPagadoRefaccion(refaccionParaPago.internalId)) }}</strong>
+                </span>
+            </div>
+            <div class="campo">
+                <label>Monto <span class="req">*</span></label>
+                <InputNumber v-model="nuevoPagoRef.monto" mode="currency" currency="USD" locale="en-US"
+                    class="w-full" :min="0.01" />
+                <p v-if="erroresPagoRef.monto" class="error-msg">{{ erroresPagoRef.monto }}</p>
+            </div>
+            <div class="campo">
+                <label>Forma de Pago <span class="req">*</span></label>
+                <Select v-model="nuevoPagoRef.formaPago" :options="formasPagoOpciones" class="w-full" placeholder="Seleccionar..." />
+                <p v-if="erroresPagoRef.formaPago" class="error-msg">{{ erroresPagoRef.formaPago }}</p>
+            </div>
+            <div v-if="nuevoPagoRef.formaPago === 'Cheque' || nuevoPagoRef.formaPago === 'Transferencia'" class="campo">
+                <label>Referencia</label>
+                <InputText v-model="nuevoPagoRef.referencia" class="w-full" placeholder="Núm. cheque / referencia" />
+            </div>
+            <div class="campo">
+                <label>Notas</label>
+                <InputText v-model="nuevoPagoRef.notas" class="w-full" />
+            </div>
+            <div class="campo">
+                <label>Fecha</label>
+                <DatePicker v-model="nuevoPagoRef.fecha" showIcon class="w-full" />
+            </div>
+        </div>
+        <template #footer>
+            <Button label="Cancelar" severity="secondary" size="small"
+                @click="dialogoPagoRefaccionVisible = false" :disabled="guardandoPagoRef" />
+            <Button label="Registrar Pago" icon="pi pi-check" size="small"
+                :loading="guardandoPagoRef" @click="guardarPagoRefaccion" />
+        </template>
+    </Dialog>
 
     <!-- ── Diálogo: Seleccionar refacción del catálogo ── -->
     <Dialog v-model:visible="dialogoSeleccionVisible" header="Seleccionar Refacción" modal
@@ -292,19 +340,26 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import DatePicker from 'primevue/datepicker'
 import { useRefaccionService } from '../composables/useRefaccionService'
+import { usePagoService } from '../composables/usePagoService'
 import ConceptosFijosCard from './ConceptosFijosCard.vue'
 import type { Refaccion as RefaccionModel, RefaccionCreate } from '../models/refaccion'
 import type { RefaccionItem, Financiero } from '../models/orden-servicio'
+import { createInternalId } from '../models/orden-servicio'
+import type { Pago, CrearPagoDTO } from '../models/pago'
 
 interface Props {
     modelValue: RefaccionItem[]
     financiero: Financiero
+    ordenId: string | null
+    pagosList: Pago[]
 }
 
 interface Emits {
     (e: 'update:modelValue', v: RefaccionItem[]): void
     (e: 'update:financiero', v: Financiero): void
+    (e: 'pagosChanged'): void
 }
 
 const props = defineProps<Props>()
@@ -314,6 +369,7 @@ const emit = defineEmits<Emits>()
 type RefaccionPartida = RefaccionItem
 
 const refaccionService = useRefaccionService()
+const pagoService = usePagoService()
 
 // ── Estado de la tabla ──
 const refacciones = ref<RefaccionItem[]>(props.modelValue && props.modelValue.length > 0 ? [...props.modelValue] : [])
@@ -376,6 +432,7 @@ const confirmarSeleccion = () => {
         ? Math.max(...refacciones.value.map(p => p.codigo)) + 1
         : 1
     refacciones.value.push({
+        internalId: createInternalId(),
         codigo: nextCodigo,
         nombre: r.nombre,
         aparato: r.aparato,
@@ -450,6 +507,7 @@ const agregarFilaVacia = () => {
         ? Math.max(...refacciones.value.map(p => p.codigo)) + 1
         : 1
     refacciones.value.push({
+        internalId: createInternalId(),
         codigo: nextCodigo,
         nombre: '',
         aparato: '',
@@ -542,6 +600,76 @@ const onCellEditComplete = async (event: any) => {
 const formatCurrency = (value: number | null): string => {
     if (value == null) return '—'
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+}
+
+// ── Pagos por refacción ──
+function totalPagadoRefaccion(internalId?: string): number {
+    if (!internalId) return 0
+    return props.pagosList
+        .filter(p => p.ordenServicioRefaccionInternalId === internalId)
+        .reduce((sum, p) => sum + p.monto, 0)
+}
+
+const dialogoPagoRefaccionVisible = ref(false)
+const refaccionParaPago = ref<RefaccionItem | null>(null)
+const guardandoPagoRef = ref(false)
+const erroresPagoRef = ref<{ monto?: string; formaPago?: string }>({})
+const nuevoPagoRef = ref<{ monto: number | null; formaPago: string; referencia: string; notas: string; fecha: Date }>({
+    monto: null, formaPago: '', referencia: '', notas: '', fecha: new Date()
+})
+const formasPagoOpciones = ['Efectivo', 'Tarjeta', 'Cheque', 'Transferencia', 'Otro']
+
+function abrirPagoRefaccion(data: RefaccionItem) {
+    refaccionParaPago.value = data
+    nuevoPagoRef.value = { monto: null, formaPago: '', referencia: '', notas: '', fecha: new Date() }
+    erroresPagoRef.value = {}
+    dialogoPagoRefaccionVisible.value = true
+}
+
+function resetPagoRefaccionForm() {
+    refaccionParaPago.value = null
+    nuevoPagoRef.value = { monto: null, formaPago: '', referencia: '', notas: '', fecha: new Date() }
+    erroresPagoRef.value = {}
+}
+
+async function guardarPagoRefaccion() {
+    erroresPagoRef.value = {}
+    if (!nuevoPagoRef.value.monto || nuevoPagoRef.value.monto <= 0) {
+        erroresPagoRef.value.monto = 'El monto debe ser mayor a 0.'
+        return
+    }
+    if (!nuevoPagoRef.value.formaPago) {
+        erroresPagoRef.value.formaPago = 'Seleccione una forma de pago.'
+        return
+    }
+    const precio = refaccionParaPago.value?.precio ?? 0
+    const pagado = totalPagadoRefaccion(refaccionParaPago.value?.internalId)
+    if (nuevoPagoRef.value.monto > precio - pagado) {
+        erroresPagoRef.value.monto = `El monto supera el pendiente (${formatCurrency(precio - pagado)}).`
+        return
+    }
+    if (!props.ordenId || !refaccionParaPago.value?.internalId) return
+    guardandoPagoRef.value = true
+    try {
+        const dto: CrearPagoDTO = {
+            monto: nuevoPagoRef.value.monto,
+            formaPago: nuevoPagoRef.value.formaPago,
+            referencia: nuevoPagoRef.value.referencia || undefined,
+            notas: nuevoPagoRef.value.notas || undefined,
+            fecha: nuevoPagoRef.value.fecha
+                ? nuevoPagoRef.value.fecha.toISOString().split('T')[0]
+                : undefined,
+            ordenServicioRefaccionInternalId: refaccionParaPago.value.internalId
+        }
+        await pagoService.crearPago(props.ordenId, dto)
+        dialogoPagoRefaccionVisible.value = false
+        emit('pagosChanged')
+    } catch (e) {
+        console.error('Error al registrar pago de refacción', e)
+        erroresPagoRef.value.monto = 'Error al registrar el pago. Intenta de nuevo.'
+    } finally {
+        guardandoPagoRef.value = false
+    }
 }
 
 // ── Actualizar refacción ──
@@ -734,6 +862,36 @@ defineExpose({ refacciones })
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+}
+
+/* ── Pago refacción ── */
+.pago-ref-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.15rem;
+}
+
+.pago-ref-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-bottom: 0.25rem;
+    padding: 0.5rem 0.6rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.pago-ref-nombre {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #1e2740;
+}
+
+.pago-ref-stats {
+    font-size: 0.78rem;
+    color: #6b7280;
 }
 
 .catalogo-table :deep(.p-datatable-tbody > tr > td) {

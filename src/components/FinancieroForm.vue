@@ -38,7 +38,11 @@
                     <div v-if="pagosList.length === 0" class="pagos-empty">Sin pagos registrados</div>
                     <div v-for="pago in pagosList" :key="pago._id" class="pago-row">
                         <div class="pago-info">
-                            <span class="pago-forma">{{ pago.formaPago }}</span>
+                            <span class="pago-forma"> {{pago.tipo == 'anticipo' ? 'Anticipo en ' : 'Pago en '}} {{ pago.formaPago }}</span>
+                            <span v-if="pago.ordenServicioRefaccionInternalId" class="pago-ref-tag">
+                                <i class="pi pi-box" style="font-size:0.65rem"></i>
+                                {{ getRefaccionNombre(pago.ordenServicioRefaccionInternalId) }}
+                            </span>
                             <span class="pago-fecha">{{ formatFecha(pago.fecha) }}</span>
                         </div>
                         <span class="pago-monto">{{ formatCurrency(pago.monto) }}</span>
@@ -187,6 +191,12 @@ const updateField = (field: keyof Financiero, value: number | null) => {
     emit('update:financiero', { ...props.financiero, [field]: value ?? 0 })
 }
 
+// ── Helpers ──
+function getRefaccionNombre(internalId: string): string {
+    const ref = props.refacciones.find(r => r.internalId === internalId)
+    return ref ? ref.nombre : 'Refacción'
+}
+
 // ── Nuevo pago ──
 const dialogoPagoVisible = ref(false)
 const guardandoPago = ref(false)
@@ -253,8 +263,20 @@ const eliminarPago = async () => {
     if (!pagoAEliminar.value?._id) return
     deletingId.value = pagoAEliminar.value._id
     try {
-        await pagoService.eliminarPago(pagoAEliminar.value._id)
+        const pagoId = pagoAEliminar.value._id
+        await pagoService.eliminarPago(pagoId)
         dialogoConfirmarVisible.value = false
+        // Si era el anticipo, limpiar los campos de anticipo en financiero
+        if (pagoId === props.financiero.anticipoPagoId) {
+            emit('update:financiero', {
+                ...props.financiero,
+                anticipo: 0,
+                anticipoPagoId: undefined,
+                anticipoFormaPago: undefined,
+                anticipoReferencia: undefined,
+                anticipoNotas: undefined,
+            })
+        }
         emit('pagosChanged')
     } catch (e) {
         console.error('Error al eliminar pago', e)
@@ -385,7 +407,7 @@ const eliminarPago = async () => {
     padding: 0.18rem 0.3rem;
     border-radius: 4px;
     background: var(--surface-section, rgba(0,0,0,0.03));
-    font-size: 11px;
+    font-size: 14px;
 }
 
 .pago-info {
@@ -397,6 +419,7 @@ const eliminarPago = async () => {
 
 .pago-forma {
     font-weight: 600;
+    font-size: 11px;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -406,6 +429,19 @@ const eliminarPago = async () => {
 .pago-fecha {
     font-size: 10px;
     color: var(--text-muted);
+}
+
+.pago-ref-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 9px;
+    font-weight: 600;
+    background: #e8edff;
+    color: #3b5bdb;
+    padding: 1px 5px;
+    border-radius: 8px;
+    white-space: nowrap;
 }
 
 .pago-monto {

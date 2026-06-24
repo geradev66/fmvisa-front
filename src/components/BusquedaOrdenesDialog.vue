@@ -1,5 +1,5 @@
 <template>
-    <Dialog v-model:visible="visible" header="Búsqueda de Órdenes" modal :style="{ width: '860px' }"
+    <Dialog v-model:visible="visible" header="Búsqueda de Órdenes" modal :style="{ width: '140vh' }"
         :breakpoints="{ '960px': '95vw' }" @show="buscar">
         <div class="busqueda-container">
             <!-- Filtros -->
@@ -50,7 +50,7 @@
                 </Column>
                 <Column header="Total" style="width: 90px; min-width: 90px">
                     <template #body="{ data }">
-                        {{ formatCurrency(calcularTotal(data.financiero)) }}
+                        {{ formatCurrency(calcularTotal(data.refacciones, data.financiero)) }}
                     </template>
                 </Column>
             </DataTable>
@@ -88,7 +88,10 @@ import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import Paginator from 'primevue/paginator'
 import { useOrdenServicioService } from '../composables/useOrdenServicioService'
-import type { OrdenServicio, Financiero } from '../models/orden-servicio'
+import { useOrdenServicio } from '../composables/useOrdenServicio';
+import type { OrdenServicio } from '../models/orden-servicio'
+
+const { calcularTotal } = useOrdenServicio()
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{
@@ -121,11 +124,11 @@ const estadoOpciones = [
     { label: 'Ninguno',   value: 'Ninguno' },
 ]
 
+
 const buscar = async (pagina = 1) => {
     try {
         loading.value = true
         paginaActual.value = pagina
-
         if (query.value.trim()) {
             const resultados = await ordenService.buscarOrdenes(query.value.trim())
             ordenes.value = resultados
@@ -163,10 +166,6 @@ const formatDate = (date: Date | string | null): string => {
 const formatCurrency = (v: number): string =>
     new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(v)
 
-const calcularTotal = (f?: Financiero): number => {
-    if (!f) return 0
-    return (f.presupuesto ?? 0) + (f.revision ?? 0) + (f.iva ?? 0) - (f.anticipo ?? 0) - (f.pagos ?? 0)
-}
 
 const toISODate = (d: Date) => d.toISOString().split('T')[0]
 
