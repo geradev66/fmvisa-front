@@ -38,7 +38,52 @@
                 <Button label="Salida" icon="pi pi-box" severity="warning" outlined size="large" @click="confirmarSalida" :disabled="!ordenId"></Button>
                 <Button label="Búsqueda" icon="pi pi-search" severity="secondary" outlined size="large" @click="mostrarBusqueda = true"></Button>
                 <Button icon="pi pi-print" severity="secondary" outlined size="large" @click="mostrarImpresoras = true"></Button>
-                <Button :icon="settings.isDark ? 'pi pi-sun' : 'pi pi-moon'" severity="secondary" outlined size="large" @click="settings.toggleDark" v-tooltip="settings.isDark ? 'Modo claro' : 'Modo oscuro'" aria-label="Cambiar tema"></Button>
+
+                <!-- Avatar / user menu -->
+                <div class="user-avatar" :style="{ background: avatarColor }" @click="avatarPopover?.toggle($event)" v-tooltip="authStore.user?.firstName + ' ' + authStore.user?.lastName">
+                    {{ avatarInitials }}
+                </div>
+                <Popover ref="avatarPopover" class="avatar-popover">
+                    <!-- User info -->
+                    <div class="ap-user-info">
+                        <div class="ap-avatar-lg" :style="{ background: avatarColor }">{{ avatarInitials }}</div>
+                        <div>
+                            <p class="ap-name">{{ authStore.user?.firstName }} {{ authStore.user?.lastName }}</p>
+                            <span class="ap-role-badge" :class="'role-' + authStore.user?.role">{{ labelRolUsuario(authStore.user?.role) }}</span>
+                        </div>
+                    </div>
+                    <Divider />
+                    <!-- Actions -->
+                    <ul class="ap-menu">
+                        <li class="ap-item" @click="settings.toggleDark(); avatarPopover?.hide()">
+                            <i :class="settings.isDark ? 'pi pi-sun' : 'pi pi-moon'"></i>
+                            <span>{{ settings.isDark ? 'Modo claro' : 'Modo oscuro' }}</span>
+                        </li>
+                        <li v-if="isAdmin" class="ap-item" @click="router.push('/usuarios'); avatarPopover?.hide()">
+                            <i class="pi pi-users"></i>
+                            <span>Usuarios</span>
+                        </li>
+                        <li v-if="isAdmin" class="ap-item" @click="router.push('/tecnicos'); avatarPopover?.hide()">
+                            <i class="pi pi-wrench"></i>
+                            <span>Técnicos</span>
+                        </li>
+                        <li v-if="isAdmin" class="ap-item" @click="router.push('/refacciones'); avatarPopover?.hide()">
+                            <i class="pi pi-box"></i>
+                            <span>Refacciones</span>
+                        </li>
+                        <li class="ap-item" @click="abrirCambiarPassword(); avatarPopover?.hide()">
+                            <i class="pi pi-lock"></i>
+                            <span>Cambiar contraseña</span>
+                        </li>
+                    </ul>
+                    <Divider />
+                    <ul class="ap-menu">
+                        <li class="ap-item ap-item--danger" @click="cerrarSesion">
+                            <i class="pi pi-sign-out"></i>
+                            <span>Cerrar sesión</span>
+                        </li>
+                    </ul>
+                </Popover>
             </div>
         </div>
 
@@ -46,6 +91,28 @@
         <ReporteDiarioDialog v-model="mostrarReporte" />
         <PrintersDialog v-model="mostrarImpresoras" />
         <PrintTicketDialog v-model="mostrarImprimirTicket" :orden="ordenActual" />
+
+        <!-- Dialog: Cambiar contraseña -->
+        <Dialog v-model:visible="dialogCambiarPassword" header="Cambiar contraseña" modal :style="{ width: '380px' }" @hide="resetCambiarPassword">
+            <div class="cp-form">
+                <div class="cp-field">
+                    <label>Nueva contraseña <span class="cp-req">*</span></label>
+                    <Password v-model="cpNueva" placeholder="Nueva contraseña" class="w-full" toggleMask :feedback="false"
+                        :class="{ 'p-invalid': cpErrors.nueva }" @keyup.enter="confirmarCambioPassword" />
+                    <small v-if="cpErrors.nueva" class="cp-error">{{ cpErrors.nueva }}</small>
+                </div>
+                <div class="cp-field">
+                    <label>Confirmar contraseña <span class="cp-req">*</span></label>
+                    <Password v-model="cpConfirmar" placeholder="Confirmar contraseña" class="w-full" toggleMask :feedback="false"
+                        :class="{ 'p-invalid': cpErrors.confirmar }" @keyup.enter="confirmarCambioPassword" />
+                    <small v-if="cpErrors.confirmar" class="cp-error">{{ cpErrors.confirmar }}</small>
+                </div>
+            </div>
+            <template #footer>
+                <Button label="Cancelar" severity="secondary" text @click="dialogCambiarPassword = false" />
+                <Button label="Cambiar contraseña" icon="pi pi-check" :loading="cpGuardando" @click="confirmarCambioPassword" />
+            </template>
+        </Dialog>
 
         <!-- Diálogo: Confirmar salida -->
         <Dialog v-model:visible="dialogoSalidaVisible" header="Confirmar Salida" :modal="true" :closable="false" :style="{ width: '420px' }">
@@ -123,6 +190,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, watchEffect } from 'vue'
 import Button from 'primevue/button'
+import Popover from 'primevue/popover'
+import Divider from 'primevue/divider'
 import { Badge } from 'primevue'
 import type { 
     Fechas, 
@@ -136,9 +205,11 @@ import type {
     RefaccionItem
 } from '../models/orden-servicio'
 import { useOrdenServicioService } from '../composables/useOrdenServicioService'
-import {useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/AuthStore'
 import { useToast } from '../composables/useToast'
 import { usePagoService } from '../composables/usePagoService'
+import { useUsuarioService } from '../composables/useUsuarioService'
 import type { Pago } from '../models/pago'
 import type { CrearOrdenServicioDTO, ActualizarOrdenServicioDTO, RefaccionItemDTO } from '../models/orden-servicio'
 import { serializeFechas, serializeEstado, deserializeFechas, deserializeEstado } from '../utils/fechas'
@@ -160,9 +231,79 @@ import Dialog from 'primevue/dialog'
 // Composables
 const ordenService = useOrdenServicioService()
 const pagoService = usePagoService()
+const usuarioService = useUsuarioService()
 const settings = useSettingsStore()
+const authStore = useAuthStore()
 
-const route = useRoute()
+const route  = useRoute()
+const router = useRouter()
+
+const isAdmin = computed(() => authStore.user?.role === 'admin')
+
+// Avatar
+const avatarPopover = ref<InstanceType<typeof Popover> | null>(null)
+
+const avatarColors = ['#3b5bdb','#0e7490','#7c3aed','#c2410c','#0f766e','#be185d','#1d4ed8']
+function strToColor(s: string): string {
+    let h = 0
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+    return avatarColors[h % avatarColors.length]!
+}
+const avatarColor = computed(() => {
+    const u = authStore.user
+    return strToColor(`${u?.firstName ?? ''}${u?.lastName ?? ''}`)
+})
+const avatarInitials = computed(() => {
+    const u = authStore.user
+    return `${u?.firstName?.[0] ?? ''}${u?.lastName?.[0] ?? ''}`.toUpperCase()
+})
+function labelRolUsuario(role?: string): string {
+    return { admin: 'Admin', employee: 'Empleado', user: 'Usuario' }[role ?? ''] ?? (role ?? '')
+}
+
+function cerrarSesion() {
+    authStore.logout()
+    router.push('/login')
+}
+
+// ── Cambiar contraseña (usuario logueado) ──
+const dialogCambiarPassword = ref(false)
+const cpNueva      = ref('')
+const cpConfirmar  = ref('')
+const cpGuardando  = ref(false)
+const cpErrors     = ref<{ nueva?: string; confirmar?: string }>({})
+
+function abrirCambiarPassword() {
+    resetCambiarPassword()
+    dialogCambiarPassword.value = true
+}
+
+function resetCambiarPassword() {
+    cpNueva.value     = ''
+    cpConfirmar.value = ''
+    cpErrors.value    = {}
+    cpGuardando.value = false
+}
+
+async function confirmarCambioPassword() {
+    cpErrors.value = {}
+    if (!cpNueva.value.trim())          cpErrors.value.nueva     = 'La contraseña es requerida'
+    if (cpNueva.value !== cpConfirmar.value) cpErrors.value.confirmar = 'Las contraseñas no coinciden'
+    if (Object.keys(cpErrors.value).length) return
+
+    const uid = authStore.user?.id
+    if (!uid) return
+    cpGuardando.value = true
+    try {
+        await usuarioService.cambiarPassword(uid, { password: cpNueva.value })
+        toast.showSuccess('Tu contraseña ha sido cambiada correctamente.')
+        dialogCambiarPassword.value = false
+    } catch (e: any) {
+        toast.showError(e?.response?.data?.message ?? 'No se pudo cambiar la contraseña.')
+    } finally {
+        cpGuardando.value = false
+    }
+}
 const toast = useToast()
 
 // Estado
@@ -794,6 +935,105 @@ onMounted(() => {
 .action-buttons :deep(.p-button-icon) {
     font-size: 12px;
 }
+
+/* ── User avatar ── */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    flex-shrink: 0;
+    user-select: none;
+    transition: opacity 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+.user-avatar:hover {
+    opacity: 0.88;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.28);
+}
+
+/* ── Avatar popover (scoped via :deep on parent) ── */
+:deep(.avatar-popover) {
+    min-width: 220px;
+    padding: 0;
+}
+:deep(.avatar-popover .p-popover-content) {
+    padding: 0;
+}
+.ap-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+}
+.ap-avatar-lg {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.ap-name {
+    margin: 0 0 0.2rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--p-text-color, #1e2740);
+    white-space: nowrap;
+}
+.ap-role-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.ap-role-badge.role-admin    { background: #fee2e2; color: #b91c1c; }
+.ap-role-badge.role-employee { background: #dbeafe; color: #1d4ed8; }
+.ap-role-badge.role-user     { background: #f3f4f6; color: #374151; }
+
+.ap-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem 0;
+}
+.ap-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 1rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--p-text-color, #374151);
+    transition: background 0.13s;
+    border-radius: 4px;
+    margin: 0 0.25rem;
+}
+.ap-item:hover { background: var(--p-content-hover-background, #f3f4f6); }
+.ap-item i     { font-size: 0.95rem; width: 16px; text-align: center; opacity: 0.75; }
+.ap-item--danger       { color: #dc2626; }
+.ap-item--danger:hover { background: #fef2f2; }
+.ap-item--danger i     { opacity: 1; }
+
+/* ── Change password dialog ── */
+.cp-form  { display: flex; flex-direction: column; gap: 0.9rem; padding: 0.25rem 0; }
+.cp-field { display: flex; flex-direction: column; gap: 0.35rem; }
+.cp-field label { font-weight: 600; font-size: 0.88rem; color: #374151; }
+.cp-req   { color: #e02424; }
+.cp-error { color: #e02424; font-size: 0.8rem; }
 
 /* =============================================
    MAIN CONTENT FLEX COLUMN

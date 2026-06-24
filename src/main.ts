@@ -9,7 +9,7 @@ import 'primeicons/primeicons.css'
 
 // Import services and injection keys
 import { OrdenServicioService } from './services/OrdenServicioService';
-import { AuthServiceKey, ClienteServiceKey, EquipoServiceKey, OrdenServicioServiceKey, RefaccionServiceKey, TecnicoServiceKey, PrinterServiceKey, PagoServiceKey } from './injection-keys';
+import { AuthServiceKey, ClienteServiceKey, EquipoServiceKey, OrdenServicioServiceKey, RefaccionServiceKey, TecnicoServiceKey, PrinterServiceKey, PagoServiceKey, UsuarioServiceKey, MovimientoInventarioServiceKey } from './injection-keys';
 
 // Import individual components
 import Button from 'primevue/button';
@@ -42,6 +42,8 @@ import { RefaccionService } from './services/RefaccionService';
 import { TecnicoService } from './services/TecnicoService';
 import { PrinterService } from './services/PrinterService';
 import { PagoService } from './services/PagoService';
+import { UsuarioService } from './services/UsuarioService';
+import { MovimientoInventarioService } from './services/MovimientoInventarioService';
 
 const app = createApp(App);
 app.use(PrimeVue, {
@@ -180,6 +182,8 @@ const refaccionService = new RefaccionService();
 const tecnicoService = new TecnicoService();
 const printerService = new PrinterService();
 const pagoService = new PagoService();
+const usuarioService = new UsuarioService();
+const movimientoInventarioService = new MovimientoInventarioService();
 app.provide(OrdenServicioServiceKey, ordenServicioService);
 app.provide(AuthServiceKey, authService);
 app.provide(ClienteServiceKey, clienteService);
@@ -188,6 +192,8 @@ app.provide(RefaccionServiceKey, refaccionService);
 app.provide(TecnicoServiceKey, tecnicoService);
 app.provide(PrinterServiceKey, printerService);
 app.provide(PagoServiceKey, pagoService);
+app.provide(UsuarioServiceKey, usuarioService);
+app.provide(MovimientoInventarioServiceKey, movimientoInventarioService);
 
 // Provide more services as needed
 // Register components
