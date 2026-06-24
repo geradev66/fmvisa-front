@@ -309,7 +309,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import FloatLabel from 'primevue/floatlabel'
@@ -460,9 +460,6 @@ const abrirDialogoTecnico = () => {
     errorTecnico.value = ''
     dialogoTecnicoVisible.value = true
 }
-
-const updateFormaPagoCheque = (_value: string | undefined) => {}
-const updateFormaPagoEspecifique = (_value: string | undefined) => {}
 
 const guardarNuevoTecnico = async () => {
     if (!nuevoTecnico.value.nombre.trim()) {

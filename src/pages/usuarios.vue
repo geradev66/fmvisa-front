@@ -25,7 +25,7 @@
                     placeholder="Todos los roles"
                     class="filtro-rol"
                     showClear
-                    @change="cargarUsuarios"
+                    @change="() => cargarUsuarios()"
                 />
             </div>
             <span class="total-label">{{ pagination.totalItems }} usuario{{ pagination.totalItems !== 1 ? 's' : '' }}</span>
@@ -298,7 +298,7 @@ async function cargarUsuarios(page = 1) {
         usuarios.value = res.data
         Object.assign(pagination, res.pagination)
     } catch (e: any) {
-        toast.error('Error al cargar usuarios', e?.response?.data?.message ?? 'Error desconocido')
+        toast.showError('Error al cargar usuarios', e?.response?.data?.message ?? 'Error desconocido')
     } finally {
         loading.value = false
     }
@@ -382,7 +382,7 @@ async function guardarUsuario() {
             }
             if (form.role === 'employee' && form.tecnicoId) dto.tecnicoId = form.tecnicoId
             await usuarioService.actualizarUsuario(usuarioId.value, dto)
-            toast.success('Usuario actualizado')
+            toast.showSuccess('Usuario actualizado')
         } else {
             const dto: any = {
                 firstName: form.firstName,
@@ -394,7 +394,7 @@ async function guardarUsuario() {
             }
             if (form.role === 'employee' && form.tecnicoId) dto.tecnicoId = form.tecnicoId
             await usuarioService.crearUsuario(dto)
-            toast.success('Usuario creado')
+            toast.showSuccess('Usuario creado')
         }
         dialogVisible.value = false
         cargarUsuarios(pagination.currentPage)
@@ -402,9 +402,9 @@ async function guardarUsuario() {
         const msg = e?.response?.data?.message ?? 'Error al guardar'
         const apiErrors: string[] = e?.response?.data?.errors ?? []
         if (apiErrors.length) {
-            toast.error('Error de validación', apiErrors.join(', '))
+            toast.showError('Error de validación', apiErrors.join(', '))
         } else {
-            toast.error('Error', msg)
+            toast.showError('Error', msg)
         }
     } finally {
         saving.value = false
@@ -427,10 +427,10 @@ async function cambiarPassword() {
     savingPassword.value = true
     try {
         await usuarioService.cambiarPassword(usuarioPassword.value._id, { password: nuevaPassword.value })
-        toast.success('Contraseña actualizada')
+        toast.showSuccess('Contraseña actualizada')
         dialogPasswordVisible.value = false
     } catch (e: any) {
-        toast.error('Error', e?.response?.data?.message ?? 'Error al cambiar contraseña')
+        toast.showError('Error', e?.response?.data?.message ?? 'Error al cambiar contraseña')
     } finally {
         savingPassword.value = false
     }
@@ -446,11 +446,11 @@ async function eliminarUsuario() {
     deleting.value = true
     try {
         await usuarioService.eliminarUsuario(usuarioAEliminar.value._id)
-        toast.success('Usuario eliminado')
+        toast.showSuccess('Usuario eliminado')
         dialogEliminarVisible.value = false
         cargarUsuarios(pagination.currentPage)
     } catch (e: any) {
-        toast.error('Error', e?.response?.data?.message ?? 'Error al eliminar')
+        toast.showError('Error', e?.response?.data?.message ?? 'Error al eliminar')
     } finally {
         deleting.value = false
     }

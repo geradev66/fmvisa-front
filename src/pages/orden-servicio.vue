@@ -392,28 +392,6 @@ const estadoBadgeSeverity = computed(() => {
     return severityMap[estadoOrden.value] || 'secondary'
 })
 
-const referenciaBadgeValue = computed(() => {
-    const labelMap: Record<ReferenciaTipo, string> = {
-        'Garantia': 'Gtia. reparacion',
-        'SinReparacion': 'Sin reparacion',
-        'NoAutorizo': 'No autorizo',
-        'Reparado': 'Reparado',
-        'Ninguno': 'Ninguno'
-    }
-    return labelMap[referencias.value] || 'Ninguno'
-})
-
-const referenciaBadgeSeverity = computed(() => {
-    const severityMap: Record<ReferenciaTipo, 'success' | 'warn' | 'info' | 'danger' | 'secondary' | 'contrast'> = {
-        'Garantia': 'info',
-        'SinReparacion': 'warn',
-        'NoAutorizo': 'danger',
-        'Reparado': 'success',
-        'Ninguno': 'secondary'
-    }
-    return severityMap[referencias.value] || 'secondary'
-})
-
 const financiero = ref<Financiero>({
     presupuesto: 0.00,
     revision: 0.00,

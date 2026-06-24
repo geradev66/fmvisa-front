@@ -313,8 +313,6 @@ const emit = defineEmits<Emits>()
 // ── Alias local ──
 type RefaccionPartida = RefaccionItem
 
-const opcionesPago = ['Efectivo', 'Tarjeta', 'Transferencia', 'Cheques', 'Otro']
-
 const refaccionService = useRefaccionService()
 
 // ── Estado de la tabla ──

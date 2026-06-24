@@ -28,7 +28,7 @@
                     placeholder="Todos"
                     class="filtro-select"
                     showClear
-                    @change="cargar"
+                    @change="() => cargar"
                 />
             </div>
             <span class="total-label">{{ pagination.totalItems }} técnico{{ pagination.totalItems !== 1 ? 's' : '' }}</span>
