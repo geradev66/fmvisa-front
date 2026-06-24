@@ -11,7 +11,11 @@
                     <p class="page-sub">Administración de acceso al sistema</p>
                 </div>
             </div>
-            <Button label="Nuevo Usuario" icon="pi pi-plus" @click="abrirCrear" />
+            <div class="header-actions">
+                <Button label="XLS" icon="pi pi-file-excel" severity="success" outlined @click="exportarXLS" />
+                <Button label="PDF" icon="pi pi-file-pdf" severity="danger" outlined @click="exportarPDF" />
+                <Button label="Nuevo Usuario" icon="pi pi-plus" @click="abrirCrear" />
+            </div>
         </div>
 
         <!-- ── Filtros ── -->
@@ -205,6 +209,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import * as XLSX from 'xlsx'
 import Toast from 'primevue/toast'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
@@ -456,6 +463,50 @@ async function eliminarUsuario() {
     }
 }
 
+async function exportarPDF() {
+    const params: Record<string, any> = { limit: 1000000 }
+    if (filtroRol.value) params.role = filtroRol.value
+    const res = await usuarioService.listarUsuarios(params)
+    const todos = res.data
+    const doc = new jsPDF()
+    doc.setFontSize(14)
+    doc.text('Usuarios', 14, 16)
+    autoTable(doc, {
+        startY: 22,
+        head: [['Nombre', 'Email', 'Teléfono', 'Rol', 'Verificado', 'Técnico']],
+        body: todos.map(u => [
+            `${u.firstName} ${u.lastName}`,
+            u.email,
+            u.phone ?? '—',
+            labelRol(u.role),
+            u.isVerified ? 'Sí' : 'No',
+            u.tecnico?.nombre ?? '—'
+        ]),
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [59, 91, 219] }
+    })
+    doc.save('usuarios.pdf')
+}
+
+async function exportarXLS() {
+    const params: Record<string, any> = { limit: 1000000 }
+    if (filtroRol.value) params.role = filtroRol.value
+    const res = await usuarioService.listarUsuarios(params)
+    const todos = res.data
+    const data = todos.map(u => ({
+        Nombre:     `${u.firstName} ${u.lastName}`,
+        Email:      u.email,
+        Telefono:   u.phone    ?? '',
+        Rol:        labelRol(u.role),
+        Verificado: u.isVerified ? 'Sí' : 'No',
+        Tecnico:    u.tecnico?.nombre ?? ''
+    }))
+    const ws = XLSX.utils.json_to_sheet(data)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuarios')
+    XLSX.writeFile(wb, 'usuarios.xlsx')
+}
+
 onMounted(() => cargarUsuarios())
 </script>
 
@@ -476,6 +527,7 @@ onMounted(() => cargarUsuarios())
     gap: 1rem;
     flex-wrap: wrap;
 }
+.header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .header-brand {
     display: flex;
     align-items: center;

@@ -13,6 +13,8 @@
             </div>
             <div class="header-actions">
                 <Button label="Volver" icon="pi pi-arrow-left" severity="secondary" outlined @click="router.push('/orden-servicio')" />
+                <Button label="XLS" icon="pi pi-file-excel" severity="success" outlined @click="exportarXLS" />
+                <Button label="PDF" icon="pi pi-file-pdf" severity="danger" outlined @click="exportarPDF" />
                 <Button label="Nueva Refacción" icon="pi pi-plus" @click="abrirCrear" />
             </div>
         </div>
@@ -264,6 +266,9 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import * as XLSX from 'xlsx'
 import Toast from 'primevue/toast'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
@@ -534,6 +539,46 @@ async function eliminar() {
     } finally {
         deleting.value = false
     }
+}
+
+async function exportarPDF() {
+    const res = await refaccionService.obtenerRefacciones({ limit: 1000000, ...(busqueda.value.trim() ? { q: busqueda.value.trim() } : {}) })
+    const todos = res.data
+    const doc = new jsPDF()
+    doc.setFontSize(14)
+    doc.text('Refacciones', 14, 16)
+    autoTable(doc, {
+        startY: 22,
+        head: [['Nombre', 'Aparato', 'Precio', 'Costo', 'Existencias', 'Ubicación']],
+        body: todos.map(r => [
+            r.nombre,
+            r.aparato,
+            r.precio != null ? `$ ${r.precio.toFixed(2)}` : '—',
+            r.costo  != null ? `$ ${r.costo.toFixed(2)}`  : '—',
+            r.existencias ?? 0,
+            r.ubicacion ?? '—'
+        ]),
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [5, 150, 105] }
+    })
+    doc.save('refacciones.pdf')
+}
+
+async function exportarXLS() {
+    const res = await refaccionService.obtenerRefacciones({ limit: 1000000, ...(busqueda.value.trim() ? { q: busqueda.value.trim() } : {}) })
+    const todos = res.data
+    const data = todos.map(r => ({
+        Nombre:       r.nombre,
+        Aparato:      r.aparato,
+        Precio:       r.precio      ?? '',
+        Costo:        r.costo       ?? '',
+        Existencias:  r.existencias ?? 0,
+        Ubicacion:    r.ubicacion   ?? ''
+    }))
+    const ws = XLSX.utils.json_to_sheet(data)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Refacciones')
+    XLSX.writeFile(wb, 'refacciones.xlsx')
 }
 
 onMounted(() => cargar())

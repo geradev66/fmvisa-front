@@ -13,6 +13,8 @@
             </div>
             <div class="header-actions">
                 <Button label="Volver" icon="pi pi-arrow-left" severity="secondary" outlined @click="router.push('/orden-servicio')" />
+                <Button label="XLS" icon="pi pi-file-excel" severity="success" outlined @click="exportarXLS" />
+                <Button label="PDF" icon="pi pi-file-pdf" severity="danger" outlined @click="exportarPDF" />
                 <Button label="Nuevo Técnico" icon="pi pi-plus" @click="abrirCrear" />
             </div>
         </div>
@@ -132,6 +134,9 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import * as XLSX from 'xlsx'
 import Toast from 'primevue/toast'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
@@ -273,6 +278,48 @@ async function eliminar() {
     } finally {
         deleting.value = false
     }
+}
+
+async function exportarPDF() {
+    const params: any = { limit: 1000000 }
+    if (filtroActivo.value !== null) params.activo = filtroActivo.value
+    const res = await tecnicoService.obtenerTecnicos(params)
+    const todos = res.data
+    const doc = new jsPDF()
+    doc.setFontSize(14)
+    doc.text('Técnicos', 14, 16)
+    autoTable(doc, {
+        startY: 22,
+        head: [['Nombre', 'Especialidad', 'Teléfono', 'Email', 'Activo']],
+        body: todos.map(t => [
+            t.nombre,
+            t.especialidad ?? '—',
+            t.telefono     ?? '—',
+            t.email        ?? '—',
+            t.activo ? 'Sí' : 'No'
+        ]),
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [180, 83, 9] }
+    })
+    doc.save('tecnicos.pdf')
+}
+
+async function exportarXLS() {
+    const params: any = { limit: 1000000 }
+    if (filtroActivo.value !== null) params.activo = filtroActivo.value
+    const res = await tecnicoService.obtenerTecnicos(params)
+    const todos = res.data
+    const data = todos.map(t => ({
+        Nombre:       t.nombre,
+        Especialidad: t.especialidad ?? '',
+        Telefono:     t.telefono     ?? '',
+        Email:        t.email        ?? '',
+        Activo:       t.activo ? 'Sí' : 'No'
+    }))
+    const ws = XLSX.utils.json_to_sheet(data)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Tecnicos')
+    XLSX.writeFile(wb, 'tecnicos.xlsx')
 }
 
 onMounted(() => cargar())
